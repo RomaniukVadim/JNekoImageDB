@@ -15,6 +15,8 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
+
+import dao.Tag;
 import utils.CryptUtils;
 import utils.ImageUtils;
 import utils.Loggable;
@@ -54,14 +56,14 @@ public class DaoService implements Loggable {
         final byte[] sha512 = CryptUtils.sha512(authData);
         this.masterKey = Arrays.copyOfRange(sha512, 16, 48);
         this.iv = Arrays.copyOfRange(sha512, 48, 64);
-        this.storageName = Hex.encodeHexString(Arrays.copyOfRange(CryptUtils.sha512(sha512), 0, 16), true);
+        this.storageName = CryptUtils.toHex(Arrays.copyOfRange(CryptUtils.sha512(sha512), 0, 16));
         final String dirPath = DATASTORAGE_ROOT + File.separator + "databases" + File.separator;
         this.storageDir = new File(dirPath + storageName).getAbsoluteFile();
         new File(dirPath).mkdirs();
 
         final String dbURI = "jdbc:h2:" + this.storageDir + ";CIPHER=AES;";
         try {
-            final String dbPassword = Hex.encodeHexString(Arrays.copyOfRange(CryptUtils.sha256(sha512), 0, 21), true);
+            final String dbPassword = CryptUtils.toHex(Arrays.copyOfRange(CryptUtils.sha256(sha512), 0, 21));
             final Properties prop = new Properties();
             prop.setProperty("hibernate.connection.driver_class", "org.h2.Driver");
             prop.setProperty("hibernate.hbm2ddl.auto", "update");
@@ -89,6 +91,7 @@ public class DaoService implements Loggable {
                     .addProperties(prop)
                     .addAnnotatedClass(ImageDuplicateProtect.class)
                     .addAnnotatedClass(ImageId.class)
+                    .addAnnotatedClass(Tag.class)
                     .configure();
 
             registry = new StandardServiceRegistryBuilder()

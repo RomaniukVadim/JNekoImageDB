@@ -18,6 +18,10 @@ import java.util.Arrays;
 public class CryptUtils {
     private final static String SALT = "2yfg3 8i&^TF^*D &^$DTYvtuif867f&TV^Rxc76$UD^U yitC%&V^&tr87x1&TF^Rct7f7&C6c6rc7tv87h7i b08b67f6cE%Y#D^VvtC^DF%&RC^U%ivi6vtvv";
 
+    public static String toHex(byte[] b) {
+        return Hex.encodeHexString(b).toLowerCase();
+    }
+
     public static byte[] sha256(byte[] b) {
         final MessageDigest md;
         try {

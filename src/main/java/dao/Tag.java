@@ -1,5 +1,6 @@
 package dao;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,6 +12,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -24,12 +26,12 @@ public class Tag implements Serializable {
     @Column(name="tag", unique = true, nullable = false)
     private String tag;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name="img_tag",
-            joinColumns = @JoinColumn(name="oid"),
-            inverseJoinColumns = @JoinColumn(name="oid")
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(name="img_tags",
+            joinColumns = @JoinColumn(name="tag_oid"),
+            inverseJoinColumns = @JoinColumn(name="img_oid")
     )
-    private Set<ImageId> images;
+    private Set<ImageId> images = new HashSet<>();
 
     public Set<ImageId> getImages() {
         return images;

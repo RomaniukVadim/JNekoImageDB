@@ -35,7 +35,7 @@ public class ImageDuplicateProtect implements Serializable {
         final String fileName = p.toFile().getName();
         final String fileSize = "-" + p.toFile().length();
         final byte[] hashable = (fileName + fileSize).getBytes();
-        setHashOfNameAndSize(Hex.encodeHexString(CryptUtils.sha512(hashable), true));
+        setHashOfNameAndSize(CryptUtils.toHex(CryptUtils.sha512(hashable)));
     }
 
     public String getHashOfNameAndSize() {

@@ -26,7 +26,7 @@ public class ImageId implements Serializable {
     @Column(name="timestamp")
     private long timestamp;
 
-    @ManyToMany(mappedBy = "Tag", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "images", fetch = FetchType.LAZY)
     private Set<Tag> tags = new HashSet<>();
 
     public ImageId() {

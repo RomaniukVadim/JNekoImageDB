@@ -2,6 +2,8 @@ package service.fs;
 
 import fao.ImageFile;
 import org.apache.commons.codec.binary.Hex;
+
+import utils.CryptUtils;
 import utils.ImageUtils;
 import utils.Utils;
 
@@ -81,7 +83,7 @@ public abstract class AbstractFileAccessService {
         final byte[] rawFile = decrypt(encryptedFile);
 
         final byte[] hashOfEncryptedData = hash(rawFile);
-        final String hashString = Hex.encodeHexString(hashOfEncryptedData, true);
+        final String hashString = CryptUtils.toHex(hashOfEncryptedData);
         if (!hashString.contentEquals(id.toLowerCase())) throw new IOException("File broken");
 
         return rawFile;
@@ -92,7 +94,7 @@ public abstract class AbstractFileAccessService {
 
         final byte[] hashOfEncryptedData = hash(data);
         final byte[] encrypted = crypt(data);
-        final String hashString = Hex.encodeHexString(hashOfEncryptedData, true);
+        final String hashString = CryptUtils.toHex(hashOfEncryptedData);
 
         final String storagePath = getStoragePath(hashString);
         final Path fileForSave = new File(storagePath).getAbsoluteFile().toPath();

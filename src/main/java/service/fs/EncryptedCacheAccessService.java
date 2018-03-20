@@ -30,7 +30,7 @@ public class EncryptedCacheAccessService extends AbstractFileAccessService imple
         final byte[] sha512 = CryptUtils.sha512(authData);
         this.masterKey = Arrays.copyOfRange(sha512, 16, 48);
         this.iv = Arrays.copyOfRange(sha512, 48, 64);
-        this.storageName = Hex.encodeHexString(Arrays.copyOfRange(CryptUtils.sha512(sha512), 0, 16), true);
+        this.storageName = CryptUtils.toHex(Arrays.copyOfRange(CryptUtils.sha512(sha512), 0, 16));
         this.storageDir = new File(DATASTORAGE_ROOT + CACHE + File.separator + this.storageName).getAbsoluteFile();
         this.storageDir.mkdirs();
     }
@@ -53,7 +53,7 @@ public class EncryptedCacheAccessService extends AbstractFileAccessService imple
             switch (p.getType()) {
                 case LOCAL_FS:
                     final byte[] hashOfEncryptedData = hash(getIdString(p).getBytes());
-                    id = Hex.encodeHexString(hashOfEncryptedData, true);
+                    id = CryptUtils.toHex(hashOfEncryptedData);
                     break;
                 case INTERNAL_DATABASE:
                     id = getIDBCacheId(p);
@@ -85,7 +85,7 @@ public class EncryptedCacheAccessService extends AbstractFileAccessService imple
                 case LOCAL_FS:
                     if (Objects.isNull(data)) throw new IOException("Cannot write a null files");
                     final byte[] hashOfEncryptedData = hash(getIdString(p).getBytes());
-                    hashString = Hex.encodeHexString(hashOfEncryptedData, true);
+                    hashString = CryptUtils.toHex(hashOfEncryptedData);
                     break;
                 case INTERNAL_DATABASE:
                     hashString = getIDBCacheId(p);
@@ -109,7 +109,7 @@ public class EncryptedCacheAccessService extends AbstractFileAccessService imple
     public String getIDBCacheId(ImageFile p) {
         final String cacheIdText = p.getType().name() + "-" + p.getImageDatabaseId().getOid() + "-" +
                 p.getImageFileDimension().getPreviewWidth() + "-" + p.getImageFileDimension().getPreviewHeight();
-        return Hex.encodeHexString(hash(cacheIdText.getBytes()), true);
+        return CryptUtils.toHex(hash(cacheIdText.getBytes()));
     }
 
     public void invalidateCache() {

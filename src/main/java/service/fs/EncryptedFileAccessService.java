@@ -66,7 +66,7 @@ public class EncryptedFileAccessService extends AbstractFileAccessService {
         final byte[] sha512 = CryptUtils.sha512(authData);
         this.masterKey = Arrays.copyOfRange(sha512, 0, 32);
         this.iv = Arrays.copyOfRange(sha512, 32, 48);
-        this.storageName = Hex.encodeHexString(Arrays.copyOfRange(CryptUtils.sha512(sha512), 48, 64), true);
+        this.storageName = CryptUtils.toHex(Arrays.copyOfRange(CryptUtils.sha512(sha512), 48, 64));
         this.storageDir = new File(DATASTORAGE_ROOT + "data/" + this.storageName).getAbsoluteFile();
         this.storageDir.mkdirs();
 

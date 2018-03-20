@@ -28,6 +28,8 @@ public class DBImageList extends AbstractImageList {
 
     @Override
     public List<ImageFile> imageRequest(int page, int pages) {
+        if (Objects.isNull(imageCache)) return null;
+
         final int from = getElementsPerPage() * page;
         final long[] ids = new long[getElementsPerPage()];
         final int realLen = imageCache.length - from;
