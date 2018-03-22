@@ -91,9 +91,6 @@ public class AsyncDaoService extends MultithreadedSingletone<AsyncDaoTransaction
 		case UPDATE:
 
 			break;
-		case PUSH_FILE:
-
-			break;
 		}
 	}
 

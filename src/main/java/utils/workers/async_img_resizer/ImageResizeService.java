@@ -1,4 +1,4 @@
-package utils.workers.image_resizer;
+package utils.workers.async_img_resizer;
 
 import dao.ImageId;
 import fao.ImageFile;
@@ -10,6 +10,9 @@ import utils.Loggable;
 import utils.messages.MessageQueue;
 import utils.messages.Msg;
 import utils.messages.MultithreadedSingletone;
+import utils.workers.async_dao.AsyncDaoService;
+import utils.workers.async_dao.DaoServiceReader;
+import utils.workers.async_fs.AsyncFsService;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -38,6 +41,43 @@ public class ImageResizeService extends MultithreadedSingletone<ImageResizeTask>
 
     @Override
     public void processQueue(ImageResizeTask element) {
+        if (Objects.isNull(element)) return;
+        if (Objects.isNull(element.getImageFile())) return;
+        if (Objects.isNull(element.getImageFile().getType())) return;
+
+        switch (element.getImageFile().getType()) {
+            case LOCAL_FS:
+                if (Objects.isNull(element.getImageFile().getImagePath())) return;
+
+
+
+
+
+                break;
+            case INTERNAL_DATABASE:
+                if (Objects.isNull(element.getImageFile().getImageDatabaseId())) return;
+                final String id = element.getImageFile().getImageDatabaseId().getImgId();
+                try {
+                    final byte[] imgBytes = AsyncFsService.readCache(id);
+
+
+                } catch (IOException e) {
+
+                }
+                break;
+        }
+
+
+
+
+        final String id = element.getImageFile().getImageDatabaseId()
+
+
+
+
+
+
+
         try {
             final Image img = Optional.ofNullable(RootService.getCacheService().readCacheElement(element.getImageFile()))
                     .map(b -> new Image(new ByteArrayInputStream(b)))

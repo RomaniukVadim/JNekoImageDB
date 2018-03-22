@@ -1,4 +1,4 @@
-package utils.workers.image_resizer;
+package utils.workers.async_img_resizer;
 
 import org.imgscalr.Scalr;
 
@@ -11,7 +11,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 
 import com.intellij.util.ui.UIUtil;
 

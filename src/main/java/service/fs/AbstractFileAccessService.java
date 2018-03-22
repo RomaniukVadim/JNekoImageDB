@@ -1,22 +1,5 @@
 package service.fs;
 
-import fao.ImageFile;
-
-import utils.security.SecurityCryptUtils;
-import utils.workers.image_resizer.ImageResizeUtils;
-import utils.Utils;
-
-import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
-
-import static java.nio.file.StandardOpenOption.CREATE;
-
 public abstract class AbstractFileAccessService {
   /*   abstract byte[] crypt(byte[] plainBlob);
     abstract byte[] decrypt(byte[] cryptedBlob);

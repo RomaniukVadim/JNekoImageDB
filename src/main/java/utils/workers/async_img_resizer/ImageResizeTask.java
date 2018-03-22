@@ -1,4 +1,4 @@
-package utils.workers.image_resizer;
+package utils.workers.async_img_resizer;
 
 import fao.ImageFile;
 

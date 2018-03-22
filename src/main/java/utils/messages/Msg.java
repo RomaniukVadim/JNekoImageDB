@@ -44,6 +44,16 @@ public class Msg<T> {
 		this.toUUID = toUUID;
 	}
 
+	public Msg(T payload, int messageCategory, UUID toUUID) {
+		this.setFromThread(Thread.currentThread());
+		setTimestamp(System.currentTimeMillis());
+		this.setPayload(payload);
+		this.setPriority(Priority.NORMAL);
+		this.messageCategory = messageCategory;
+		this.msgUUID = UUID.randomUUID();
+		this.toUUID = toUUID;
+	}
+
 	public Priority getPriority() {
 		return priority;
 	}

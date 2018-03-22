@@ -7,9 +7,9 @@ import service.fs.EncryptedCacheAccessService;
 import service.fs.EncryptedFileAccessService;
 import ui.dialog.ImportImagesDialog;
 import utils.messages.MessageQueue;
-import utils.security.SecurityService;
 import utils.workers.async_dao.AsyncDaoService;
-import utils.workers.image_resizer.ImageResizeService;
+import utils.workers.async_fs.AsyncFsService;
+import utils.workers.async_img_resizer.ImageResizeService;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,8 +37,8 @@ public class RootService {
 
     public static void dispose() {
         if (Objects.nonNull(importImagesDialog)) importImagesDialog.dispose();
-        if (Objects.nonNull(encryptedFileAccessService)) encryptedFileAccessService.dispose();
 
+        AsyncFsService.dispose();
         AsyncDaoService.dispose();
         ImageResizeService.dispose();
         MessageQueue.dispose();

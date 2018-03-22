@@ -1,67 +1,66 @@
 package utils.workers.async_fs;
 
-import static java.nio.file.StandardOpenOption.CREATE;
-import static service.RootService.DATASTORAGE_ROOT;
+import static utils.workers.async_dao.AsyncDaoTransactionType.INSERT;
 
-import java.awt.*;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
+import dao.ImageId;
 import fao.ImageFile;
 import utils.Loggable;
-import utils.Utils;
 import utils.messages.MessageQueue;
 import utils.messages.Msg;
 import utils.messages.MultithreadedSingletone;
-import utils.security.SecurityCryptUtils;
-import utils.security.SecurityService;
+import utils.workers.async_dao.AsyncDaoService;
 import utils.workers.async_dao.AsyncDaoTransaction;
-import utils.workers.image_resizer.ImageResizeUtils;
 
-public class AsyncFsService extends MultithreadedSingletone<AsyncFsTask> implements Loggable {
-	private final FilesIO cacheIO;
-	private final FilesIO filesIO;
+public class AsyncFsService extends MultithreadedSingletone<AsyncFsService.Task> implements Loggable {
+	public static class Task {
+		private final UUID uuid = UUID.randomUUID();
+		private Path path;
 
-	private void savePreview(AsyncFsTask element) {
-		if (Objects.isNull(element.getFileContent())) return;
+		public UUID getUuid() {
+			return uuid;
+		}
 
+		public Path getPath() {
+			return path;
+		}
+
+		public void setPath(Path path) {
+			this.path = path;
+		}
 	}
 
-	private void saveImage(AsyncFsTask element) {
-		if (Objects.isNull(element.getFileContent())) return;
+	private static AsyncFsService asyncFsService;
+	private final FilesIO filesIO;
 
+	public static void init() {
+		if (asyncFsService == null) asyncFsService = new AsyncFsService();
+	}
+
+	public static void dispose() {
+		if (asyncFsService != null) asyncFsService.disposeInstance();
+	}
+
+	public static byte[] read(String id) throws IOException {
+		return asyncFsService.getFilesIO().read(id);
 	}
 
 	@Override
-	public void processQueue(AsyncFsTask element) {
+	public void processQueue(Task element) {
+		if (Objects.isNull(element)) return;
 		if (Objects.isNull(element.getPath())) return;
 		try {
-			switch (element.getType()) {
-			case ORIGINAL:
-
-				break;
-			case PREVIEW:
-				savePreview(element);
-				break;
-			}
 			final byte[] bytes = Files.readAllBytes(element.getPath());
-
-
-		if (element.getPath() != null) {
-
-
-				if (bytes != null) writeDBFile(bytes);
-
-		}
+			final String id = getFilesIO().write(bytes);
+			final ImageId imageId = new ImageId(id);
+			final AsyncDaoTransaction<ImageId> transaction = new AsyncDaoTransaction<>(INSERT, imageId);
+			final Msg<AsyncDaoTransaction<ImageId>> message = new Msg<>(transaction, 0, AsyncDaoService.SERVICE_UUID);
+			MessageQueue.send(message);
 		}catch (IOException e) {
 			E("ERROR: " + e.getMessage());
 		}
@@ -69,11 +68,9 @@ public class AsyncFsService extends MultithreadedSingletone<AsyncFsTask> impleme
 
 	protected AsyncFsService() {
 		super();
+		filesIO = new FilesIO();
 
-		cacheIO = new FilesIO("cache");
-		filesIO = new FilesIO("files");
-
-		MessageQueue.subscribe(SERVICE_UUID, (Msg<AsyncFsTask> msg) -> {
+		MessageQueue.subscribe(SERVICE_UUID, (Msg<Task> msg) -> {
 			pushTask(msg.getPayload());
 		});
 	}
@@ -81,5 +78,9 @@ public class AsyncFsService extends MultithreadedSingletone<AsyncFsTask> impleme
 	@Override
 	public void disposeInstance() {
 		super.disposeInstance();
+	}
+
+	public FilesIO getFilesIO() {
+		return filesIO;
 	}
 }

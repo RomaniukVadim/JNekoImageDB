@@ -1,10 +1,8 @@
 package ui;
 
 import javafx.application.Application;
-import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -15,20 +13,18 @@ import jiconfont.javafx.IconFontFX;
 import service.RootService;
 import ui.activity.AbstractActivity;
 import ui.activity.AllImagesActivity;
-import ui.dialog.ImportImagesDialog;
-import ui.dialog.PasswordDialog;
 import ui.dialog.YesNoDialog;
-import ui.imagelist.DBImageList;
 import ui.menu.Menu;
 import ui.menu.MenuGroup;
 import ui.menu.MenuItem;
 import ui.simplepanel.Panel;
 import utils.messages.MessageQueue;
-import utils.messages.MessageReceiver;
 import utils.messages.Msg;
 import utils.security.SecurityService;
 import utils.workers.async_dao.AsyncDaoService;
-import utils.workers.image_resizer.ImageResizeService;
+import utils.workers.async_fs.AsyncCacheService;
+import utils.workers.async_fs.AsyncFsService;
+import utils.workers.async_img_resizer.ImageResizeService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,8 +36,6 @@ public class Main extends Application {
     public static final UUID TOP_PANEL_UUID = UUID.randomUUID();
     public static final int TOP_PANEL_ACTION_ADD_NODES = 1;
     public static final int TOP_PANEL_ACTION_REMOVE_NODES = 2;
-
-    //private final PasswordDialog passwordDialog = new PasswordDialog();
 
     private static final Map<String, AbstractActivity> activities = new HashMap<>();
 
@@ -75,7 +69,8 @@ public class Main extends Application {
         ImageResizeService.init();
         if (SecurityService.createAuthDataWithUIPassworRequest() == null) dispose();
         AsyncDaoService.init();
-
+        AsyncFsService.init();
+        AsyncCacheService.init();
     }
 
     @Override
@@ -130,7 +125,6 @@ public class Main extends Application {
         );
 
         addActivity("AllImages", new AllImagesActivity());
-        //showActicity("AllImages");
 
         rootMenuBox.getStyleClass().addAll("null_pane", "menu_270px_width", "max_height");
         optionsBox.getStyleClass().addAll("null_pane", "max_width", "height_32px");
@@ -147,9 +141,6 @@ public class Main extends Application {
             case TOP_PANEL_ACTION_ADD_NODES:
                 subPanelMain.getChildren().clear();
                 subPanelMain.getChildren().addAll(msg.getPayload());
-                break;
-            case TOP_PANEL_ACTION_REMOVE_NODES:
-
                 break;
             }
         });

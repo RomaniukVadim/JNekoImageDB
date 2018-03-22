@@ -12,9 +12,9 @@ import jiconfont.icons.GoogleMaterialDesignIcons;
 import jiconfont.javafx.IconFontFX;
 import utils.messages.MessageQueue;
 import utils.messages.Msg;
-import utils.workers.image_resizer.ImageResizeService;
-import utils.workers.image_resizer.ImageResizeTask;
-import utils.workers.image_resizer.ImageResizeTaskCallback;
+import utils.workers.async_img_resizer.ImageResizeService;
+import utils.workers.async_img_resizer.ImageResizeTask;
+import utils.workers.async_img_resizer.ImageResizeTaskCallback;
 
 import java.nio.file.Path;
 import java.util.List;

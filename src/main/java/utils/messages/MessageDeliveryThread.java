@@ -35,9 +35,9 @@ public class MessageDeliveryThread implements Runnable {
 					final CopyOnWriteArraySet<MessageReceiver> receivers = subscribers.get(uuidTo);
 					if (Objects.nonNull(receivers)) {
 						if (message.isToUiThread()) {
-							Platform.runLater(() -> receivers.forEach(m -> m.onMessageReceive(message)));
+							Platform.runLater(() -> receivers.stream().filter(m -> m != null).forEach(m -> m.onMessageReceive(message)));
 						} else {
-							receivers.forEach(m -> m.onMessageReceive(message));
+							receivers.stream().filter(m -> m != null).forEach(m -> m.onMessageReceive(message));
 						}
 					}
 					break;

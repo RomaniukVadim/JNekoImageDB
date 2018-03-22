@@ -1,7 +1,7 @@
 package fao;
 
 import dao.ImageId;
-import utils.workers.image_resizer.ImageResizeTaskType;
+import utils.workers.async_img_resizer.ImageResizeTaskType;
 
 import java.nio.file.Path;
 
