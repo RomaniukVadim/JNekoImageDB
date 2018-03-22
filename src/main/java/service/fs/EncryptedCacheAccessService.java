@@ -1,10 +1,9 @@
 package service.fs;
 
-import dao.ImageId;
 import fao.ImageFile;
-import org.apache.commons.codec.binary.Hex;
+
 import org.apache.commons.io.FileUtils;
-import utils.CryptUtils;
+import utils.security.SecurityCryptUtils;
 import utils.Loggable;
 
 import java.io.File;
@@ -27,10 +26,10 @@ public class EncryptedCacheAccessService extends AbstractFileAccessService imple
     public EncryptedCacheAccessService(byte[] authData) {
         if (Objects.isNull(authData)) throw new IllegalArgumentException("authData cannot be null");
 
-        final byte[] sha512 = CryptUtils.sha512(authData);
+        final byte[] sha512 = SecurityCryptUtils.sha512(authData);
         this.masterKey = Arrays.copyOfRange(sha512, 16, 48);
         this.iv = Arrays.copyOfRange(sha512, 48, 64);
-        this.storageName = CryptUtils.toHex(Arrays.copyOfRange(CryptUtils.sha512(sha512), 0, 16));
+        this.storageName = SecurityCryptUtils.toHex(Arrays.copyOfRange(SecurityCryptUtils.sha512(sha512), 0, 16));
         this.storageDir = new File(DATASTORAGE_ROOT + CACHE + File.separator + this.storageName).getAbsoluteFile();
         this.storageDir.mkdirs();
     }
@@ -53,7 +52,7 @@ public class EncryptedCacheAccessService extends AbstractFileAccessService imple
             switch (p.getType()) {
                 case LOCAL_FS:
                     final byte[] hashOfEncryptedData = hash(getIdString(p).getBytes());
-                    id = CryptUtils.toHex(hashOfEncryptedData);
+                    id = SecurityCryptUtils.toHex(hashOfEncryptedData);
                     break;
                 case INTERNAL_DATABASE:
                     id = getIDBCacheId(p);
@@ -85,7 +84,7 @@ public class EncryptedCacheAccessService extends AbstractFileAccessService imple
                 case LOCAL_FS:
                     if (Objects.isNull(data)) throw new IOException("Cannot write a null files");
                     final byte[] hashOfEncryptedData = hash(getIdString(p).getBytes());
-                    hashString = CryptUtils.toHex(hashOfEncryptedData);
+                    hashString = SecurityCryptUtils.toHex(hashOfEncryptedData);
                     break;
                 case INTERNAL_DATABASE:
                     hashString = getIDBCacheId(p);
@@ -109,7 +108,7 @@ public class EncryptedCacheAccessService extends AbstractFileAccessService imple
     public String getIDBCacheId(ImageFile p) {
         final String cacheIdText = p.getType().name() + "-" + p.getImageDatabaseId().getOid() + "-" +
                 p.getImageFileDimension().getPreviewWidth() + "-" + p.getImageFileDimension().getPreviewHeight();
-        return CryptUtils.toHex(hash(cacheIdText.getBytes()));
+        return SecurityCryptUtils.toHex(hash(cacheIdText.getBytes()));
     }
 
     public void invalidateCache() {
@@ -119,17 +118,17 @@ public class EncryptedCacheAccessService extends AbstractFileAccessService imple
 
     @Override
     byte[] crypt(byte[] plainBlob) {
-        return CryptUtils.aes256Encrypt(plainBlob, masterKey, iv);
+        return SecurityCryptUtils.aes256Encrypt(plainBlob, masterKey, iv);
     }
 
     @Override
     byte[] decrypt(byte[] cryptedBlob) {
-        return CryptUtils.aes256Decrypt(cryptedBlob, masterKey, iv);
+        return SecurityCryptUtils.aes256Decrypt(cryptedBlob, masterKey, iv);
     }
 
     @Override
     byte[] hash(byte[] data) {
-        return CryptUtils.sha256(data);
+        return SecurityCryptUtils.sha256(data);
     }
 
     @Override

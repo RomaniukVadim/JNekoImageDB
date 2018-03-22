@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -21,31 +22,46 @@ import ui.imagelist.DBImageList;
 import ui.menu.Menu;
 import ui.menu.MenuGroup;
 import ui.menu.MenuItem;
+import ui.simplepanel.Panel;
+import utils.messages.MessageQueue;
+import utils.messages.MessageReceiver;
+import utils.messages.Msg;
+import utils.security.SecurityService;
+import utils.workers.async_dao.AsyncDaoService;
+import utils.workers.image_resizer.ImageResizeService;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import static service.RootService.getAuthService;
+import java.util.Set;
+import java.util.UUID;
 
 public class Main extends Application {
-    private final PasswordDialog passwordDialog = new PasswordDialog();
+    public static final UUID TOP_PANEL_UUID = UUID.randomUUID();
+    public static final int TOP_PANEL_ACTION_ADD_NODES = 1;
+    public static final int TOP_PANEL_ACTION_REMOVE_NODES = 2;
 
+    //private final PasswordDialog passwordDialog = new PasswordDialog();
 
     private static final Map<String, AbstractActivity> activities = new HashMap<>();
 
+    private final Image logoImage = new Image("/style/images/logo_inv.png");
+    private final ImageView imgLogoNode = new ImageView(logoImage);
+
+    private final VBox windowBox = new VBox();
     private final HBox rootContainerBox = new HBox();
     private final VBox rootMenuBox = new VBox();
     private final VBox optionsBox = new VBox();
     private final VBox rootPane = new VBox();
 
+    private HBox subPanelMain = new HBox();
+    private Panel panel = new Panel("panel_main_1", imgLogoNode, subPanelMain);
 
     private void dispose() {
         System.exit(0);
     }
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
+    private void initServices() {
         Application.setUserAgentStylesheet(Application.STYLESHEET_MODENA);
         IconFontFX.register(GoogleMaterialDesignIcons.getIconFont());
 
@@ -54,32 +70,19 @@ public class Main extends Application {
             dispose();
         }
 
-        passwordDialog.showAndWait();
-        if (passwordDialog.getAction() != PasswordDialog.ACTION_OK) {
-            dispose();
-        } else {
-            final String password = passwordDialog.getPassword();
-            final byte[] authData = getAuthService().getAuthDataByPassword(password);
-            if (Objects.isNull(authData)) {
-                final YesNoDialog yesNoDialog = new YesNoDialog("Database, associated with this password do not exist. Would you create a new database with this password?", true);
-                yesNoDialog.showAndWait();
-                if (yesNoDialog.getAction() == YesNoDialog.ACTION_YES) {
-                    final byte[] temporaryAuthData = getAuthService().createAuthDataByPassword(password);
-                    if (Objects.isNull(temporaryAuthData)) {
-                        new YesNoDialog("Cannot write auth-file to disk. Check your permissions.", false).showAndWait();
-                        dispose();
-                    } else {
-                        RootService.initAllEncryptedStorages(temporaryAuthData);
-                    }
-                } else {
-                    dispose();
-                }
-            } else {
-                RootService.initAllEncryptedStorages(authData);
-            }
-        }
+        MessageQueue.init();
+        SecurityService.init();
+        ImageResizeService.init();
+        if (SecurityService.createAuthDataWithUIPassworRequest() == null) dispose();
+        AsyncDaoService.init();
 
-        final Scene scene = new Scene(rootContainerBox, RootService.getAppSettings().getMainWindowWidth(), RootService.getAppSettings().getMainWindowHeight());
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        initServices();
+
+        final Scene scene = new Scene(windowBox, RootService.getAppSettings().getMainWindowWidth(), RootService.getAppSettings().getMainWindowHeight());
         scene.heightProperty().addListener((e, o, n) -> {
             RootService.getAppSettings().setMainWindowHeight(n.doubleValue());
             RootService.saveConfig();
@@ -100,13 +103,13 @@ public class Main extends Application {
             //RootService.dispose();
         });
 
-        rootContainerBox.getStylesheets().add(getClass().getResource("/style/css/main.css").toExternalForm());
+        windowBox.getStylesheets().add(getClass().getResource("/style/css/main.css").toExternalForm());
 
         final Menu mn = new Menu(
                 new MenuGroup(
                         "Images", "menu_group_container_red",
                         new MenuItem("All local images", (c) -> {
-                            showActicity("AllImages");
+                            showActivity("AllImages");
                         }),
                         /*new MenuItem("Albums", (c) -> {
 
@@ -127,14 +130,29 @@ public class Main extends Application {
         );
 
         addActivity("AllImages", new AllImagesActivity());
-        showActicity("AllImages");
+        //showActicity("AllImages");
 
         rootMenuBox.getStyleClass().addAll("null_pane", "menu_270px_width", "max_height");
-        optionsBox.getStyleClass().addAll("null_pane", "max_width", "height_48px");
+        optionsBox.getStyleClass().addAll("null_pane", "max_width", "height_32px");
         rootPane.getStyleClass().addAll("null_pane", "max_width", "max_height");
+        windowBox.getStyleClass().addAll("null_pane", "max_width", "max_height");
+        subPanelMain.getStyleClass().addAll("null_pane", "max_width", "max_height");
 
         rootMenuBox.getChildren().addAll(mn);
         rootContainerBox.getChildren().addAll(rootMenuBox, rootPane);
+        windowBox.getChildren().addAll(panel, rootContainerBox);
+
+        MessageQueue.subscribe(TOP_PANEL_UUID, (Msg<Set<Node>> msg) -> {
+            switch (msg.getMessageCategory()) {
+            case TOP_PANEL_ACTION_ADD_NODES:
+                subPanelMain.getChildren().clear();
+                subPanelMain.getChildren().addAll(msg.getPayload());
+                break;
+            case TOP_PANEL_ACTION_REMOVE_NODES:
+
+                break;
+            }
+        });
     }
 
     public void addActivity(String name, AbstractActivity activity) {
@@ -142,7 +160,7 @@ public class Main extends Application {
         activities.put(name, activity);
     }
 
-    public void showActicity(String name) {
+    public void showActivity(String name) {
         rootPane.getChildren().clear();
         final AbstractActivity n = activities.get(name);
         if (Objects.nonNull(n)) {

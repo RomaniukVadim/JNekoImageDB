@@ -1,10 +1,9 @@
 package service.fs;
 
 import javafx.application.Platform;
-import org.apache.commons.codec.binary.Hex;
 import service.RootService;
-import service.resizer.ImageResizeTask;
-import utils.CryptUtils;
+import utils.security.SecurityCryptUtils;
+import utils.workers.async_dao.DaoServiceReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,14 +32,19 @@ public class EncryptedFileAccessService extends AbstractFileAccessService {
                 if (queue.size() == 0)
                     Platform.runLater(() -> filePusherTask.getPusherActionListener().onZeroQuene());
 
-                if (RootService.getDaoService().hasDuplicates(path)) {
+                if (DaoServiceReader.hasDuplicates(path)) {
                     Platform.runLater(() -> filePusherTask.getPusherActionListener().onDuplicateDetected(path));
                 } else {
                     if (Objects.nonNull(path)) {
                         try {
                             final byte[] bytes = Files.readAllBytes(path);
                             final String id = super.writeDBFile(bytes);
-                            RootService.getDaoService().pushImageId(path, id);
+
+
+
+                            //.getDaoService().pushImageId(path, id);
+
+
                             Platform.runLater(() -> filePusherTask.getPusherActionListener().onPush(path, 0, queue.size()));
                         } catch (IOException ex) {
                             Platform.runLater(() -> filePusherTask.getPusherActionListener().onError(path, ex));
@@ -63,10 +67,10 @@ public class EncryptedFileAccessService extends AbstractFileAccessService {
     public EncryptedFileAccessService(byte[] authData) {
         if (Objects.isNull(authData)) throw new IllegalArgumentException("authData cannot be null");
 
-        final byte[] sha512 = CryptUtils.sha512(authData);
+        final byte[] sha512 = SecurityCryptUtils.sha512(authData);
         this.masterKey = Arrays.copyOfRange(sha512, 0, 32);
         this.iv = Arrays.copyOfRange(sha512, 32, 48);
-        this.storageName = CryptUtils.toHex(Arrays.copyOfRange(CryptUtils.sha512(sha512), 48, 64));
+        this.storageName = SecurityCryptUtils.toHex(Arrays.copyOfRange(SecurityCryptUtils.sha512(sha512), 48, 64));
         this.storageDir = new File(DATASTORAGE_ROOT + "data/" + this.storageName).getAbsoluteFile();
         this.storageDir.mkdirs();
 
@@ -83,17 +87,17 @@ public class EncryptedFileAccessService extends AbstractFileAccessService {
 
     @Override
     byte[] crypt(byte[] plainBlob) {
-        return CryptUtils.aes256Encrypt(plainBlob, masterKey, iv);
+        return SecurityCryptUtils.aes256Encrypt(plainBlob, masterKey, iv);
     }
 
     @Override
     byte[] decrypt(byte[] cryptedBlob) {
-        return CryptUtils.aes256Decrypt(cryptedBlob, masterKey, iv);
+        return SecurityCryptUtils.aes256Decrypt(cryptedBlob, masterKey, iv);
     }
 
     @Override
     byte[] hash(byte[] data) {
-        return CryptUtils.sha256(data);
+        return SecurityCryptUtils.sha256(data);
     }
 
     @Override

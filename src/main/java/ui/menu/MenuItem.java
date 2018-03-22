@@ -17,7 +17,7 @@ public class MenuItem extends Label {
         mil = m;
         this.getStyleClass().addAll("menu_item", "menu_max_width", "menu_element_height");
         this.setAlignment(Pos.CENTER_LEFT);
-        final IconNode iconNode = new IconNode(GoogleMaterialDesignIcons.KEYBOARD_ARROW_RIGHT);
+        final IconNode iconNode = new IconNode(GoogleMaterialDesignIcons.LABEL);
         iconNode.getStyleClass().add("menu_item_icon");
         this.setGraphic(iconNode); 
         this.setOnMouseClicked(c -> {

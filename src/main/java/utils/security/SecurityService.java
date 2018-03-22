@@ -1,9 +1,12 @@
-package service;
+package utils.security;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import dao.AuthInfo;
-import utils.CryptUtils;
+import javafx.application.Platform;
+import ui.dialog.PasswordDialog;
+import ui.dialog.YesNoDialog;
+import utils.security.SecurityCryptUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,13 +21,71 @@ import java.util.stream.Collectors;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static service.RootService.DATASTORAGE_ROOT;
 
-public class AuthService {
+public class SecurityService {
+    private static SecurityService securityService;
+
     private static final File storageDir = new File(DATASTORAGE_ROOT + "auth/").getAbsoluteFile();
     private static final Gson gson = new Gson();
     private static final SecureRandom rnd = new SecureRandom();
 
-    public AuthService() {
+    private static final PasswordDialog passwordDialog = new PasswordDialog();
+
+    private static byte[] authData = null;
+
+    public static byte[] createAuthDataWithUIPassworRequest() {
+        if (!Platform.isFxApplicationThread()) throw new IllegalThreadStateException("This method allowed only in UI thread");
+
+        final byte[] authData;
+        passwordDialog.showAndWait();
+        if (passwordDialog.getAction() != PasswordDialog.ACTION_OK) {
+            return null;
+        } else {
+            final String password = passwordDialog.getPassword();
+            authData = SecurityService.getAuthData(password);
+            if (Objects.isNull(authData)) {
+                final YesNoDialog yesNoDialog = new YesNoDialog("Database, associated with this password do not exist. Would you create a new database with this password?", true);
+                yesNoDialog.showAndWait();
+                if (yesNoDialog.getAction() == YesNoDialog.ACTION_YES) {
+                    final byte[] temporaryAuthData = SecurityService.createAuthData(password);
+                    if (Objects.isNull(temporaryAuthData)) {
+                        new YesNoDialog("Cannot write auth-file to disk. Check your permissions.", false).showAndWait();
+                        return null;
+                    } else {
+                        setAuthData(authData);
+                        return authData;
+                    }
+                } else {
+                    return null;
+                }
+            } else {
+                setAuthData(authData);
+                return authData;
+            }
+        }
+    }
+
+    public static byte[] createAuthData(String password) {
+        return securityService.createAuthDataByPassword(password);
+    }
+
+    public static byte[] getAuthData(String password) {
+        return securityService.getAuthDataByPassword(password);
+    }
+
+    public static void init() {
+        if (Objects.isNull(securityService)) securityService = new SecurityService();
+    }
+
+    protected SecurityService() {
         storageDir.mkdirs();
+    }
+
+    public static byte[] getAuthData() {
+        return authData;
+    }
+
+    public static void setAuthData(byte[] authData) {
+        SecurityService.authData = authData;
     }
 
     private byte[] readFileWOException(Path file) {
@@ -45,26 +106,26 @@ public class AuthService {
 
     private boolean verifyAuthData(String password, AuthInfo obj) {
         try {
-            final byte[] ecnryptedHash = CryptUtils.sha512(obj.getEncryptedMasterKey());
+            final byte[] ecnryptedHash = SecurityCryptUtils.sha512(obj.getEncryptedMasterKey());
             if (!Arrays.equals(ecnryptedHash, obj.getEncryptedMasterKeyHash())) return false;
             //System.out.println(Hex.encodeHexString(obj.getEncryptedMasterKey()));
 
-            final byte[] masterKey = CryptUtils.aes256Decrypt(obj.getEncryptedMasterKey(), password);
+            final byte[] masterKey = SecurityCryptUtils.aes256Decrypt(obj.getEncryptedMasterKey(), password);
             if (Objects.isNull(masterKey)) return false;
 
-            final byte[] denryptedHash = CryptUtils.sha512(masterKey);
+            final byte[] denryptedHash = SecurityCryptUtils.sha512(masterKey);
             return Arrays.equals(denryptedHash, obj.getDecryptedMasterKeyHash());
         } catch (Exception e) {
             return false;
         }
     }
 
-    public byte[] createAuthDataByPassword(String password) {
+    protected byte[] createAuthDataByPassword(String password) {
         final byte[] masterKey = new byte[512];
         rnd.nextBytes(masterKey);
-        final byte[] masterKeyHash = CryptUtils.sha512(masterKey);
-        final byte[] encryptedMasterKey = CryptUtils.aes256Encrypt(masterKey, password);
-        final byte[] encryptedMasterKeyHash = CryptUtils.sha512(encryptedMasterKey);
+        final byte[] masterKeyHash = SecurityCryptUtils.sha512(masterKey);
+        final byte[] encryptedMasterKey = SecurityCryptUtils.aes256Encrypt(masterKey, password);
+        final byte[] encryptedMasterKeyHash = SecurityCryptUtils.sha512(encryptedMasterKey);
 
         final AuthInfo authInfo = new AuthInfo();
         authInfo.setEncryptedMasterKey(encryptedMasterKey);
@@ -83,7 +144,7 @@ public class AuthService {
         return masterKey;
     }
 
-    public byte[] getAuthDataByPassword(String password) {
+    protected byte[] getAuthDataByPassword(String password) {
         final File[] files = storageDir.listFiles();
         if (Objects.isNull(files)) return null;
         if (files.length <= 0) return null;
@@ -103,7 +164,7 @@ public class AuthService {
                 .filter(obj -> verifyAuthData(password, obj))
                 .findFirst()
                 .map(obj -> obj.getEncryptedMasterKey())
-                .map(arr -> CryptUtils.aes256Decrypt(arr, password))
+                .map(arr -> SecurityCryptUtils.aes256Decrypt(arr, password))
                 .orElse(null);
     }
 }

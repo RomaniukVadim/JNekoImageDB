@@ -1,10 +1,9 @@
 package service.fs;
 
 import fao.ImageFile;
-import org.apache.commons.codec.binary.Hex;
 
-import utils.CryptUtils;
-import utils.ImageUtils;
+import utils.security.SecurityCryptUtils;
+import utils.workers.image_resizer.ImageResizeUtils;
 import utils.Utils;
 
 import java.awt.*;
@@ -19,9 +18,7 @@ import java.util.stream.Collectors;
 import static java.nio.file.StandardOpenOption.CREATE;
 
 public abstract class AbstractFileAccessService {
-    //private final CopyOnWriteArrayList<Path> temporaryList = new CopyOnWriteArrayList<>();
-
-    abstract byte[] crypt(byte[] plainBlob);
+  /*   abstract byte[] crypt(byte[] plainBlob);
     abstract byte[] decrypt(byte[] cryptedBlob);
     abstract byte[] hash(byte[] data);
     abstract File getStorageDirectory();
@@ -39,7 +36,7 @@ public abstract class AbstractFileAccessService {
         if (Objects.nonNull(imagesList)) {
             imagesList.forEach(file -> {
                 try {
-                    final Dimension dimension = ImageUtils.getImageDimension(file.toFile().getAbsoluteFile());
+                    final Dimension dimension = ImageResizeUtils.getImageDimension(file.toFile().getAbsoluteFile());
                     final ImageFile imageFile = new ImageFile(file);
                     imageFile.setRealSize(dimension.getWidth(), dimension.getHeight());
                     retval.add(imageFile);
@@ -53,7 +50,7 @@ public abstract class AbstractFileAccessService {
         return retval;
     }
 
-    /*
+
     public CopyOnWriteArrayList<Path> readImagesFromTreeOfDirs(Path dir) {
         temporaryList.clear();
         temporaryList.addAll(readImagesInternal(dir));
@@ -68,7 +65,7 @@ public abstract class AbstractFileAccessService {
                 .forEach(d -> temporaryList.addAll(readImagesInternal(d)));
 
         return readImagesFromDirectory(dir);
-    }*/
+    }
 
     public byte[] readDBFile(String id) throws IOException {
         final String storagePath = getStoragePath(id);
@@ -83,7 +80,7 @@ public abstract class AbstractFileAccessService {
         final byte[] rawFile = decrypt(encryptedFile);
 
         final byte[] hashOfEncryptedData = hash(rawFile);
-        final String hashString = CryptUtils.toHex(hashOfEncryptedData);
+        final String hashString = SecurityCryptUtils.toHex(hashOfEncryptedData);
         if (!hashString.contentEquals(id.toLowerCase())) throw new IOException("File broken");
 
         return rawFile;
@@ -94,7 +91,7 @@ public abstract class AbstractFileAccessService {
 
         final byte[] hashOfEncryptedData = hash(data);
         final byte[] encrypted = crypt(data);
-        final String hashString = CryptUtils.toHex(hashOfEncryptedData);
+        final String hashString = SecurityCryptUtils.toHex(hashOfEncryptedData);
 
         final String storagePath = getStoragePath(hashString);
         final Path fileForSave = new File(storagePath).getAbsoluteFile().toPath();
@@ -117,5 +114,5 @@ public abstract class AbstractFileAccessService {
 
         name.append(id.substring(getStorageDeep()));
         return name.toString();
-    }
+    }*/
 }

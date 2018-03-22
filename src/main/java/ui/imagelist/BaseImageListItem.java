@@ -10,15 +10,20 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import jiconfont.icons.GoogleMaterialDesignIcons;
 import jiconfont.javafx.IconFontFX;
-import service.resizer.ImageResizeService;
-import service.resizer.ImageResizeTask;
-import service.resizer.ImageResizeTaskCallback;
+import utils.messages.MessageQueue;
+import utils.messages.Msg;
+import utils.workers.image_resizer.ImageResizeService;
+import utils.workers.image_resizer.ImageResizeTask;
+import utils.workers.image_resizer.ImageResizeTaskCallback;
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class BaseImageListItem extends Canvas implements ImageResizeTaskCallback {
+    public final UUID THIS_UUID = UUID.randomUUID();
+
     private static final Image badImage = new Image("/dummy/badimage.png");
     private static final Color notSelectedColor = Color.color(0.8,0.8,0.8);
     private static final Color selectedColor = Color.color(0.3,0.8,0.3);
@@ -105,7 +110,7 @@ public class BaseImageListItem extends Canvas implements ImageResizeTaskCallback
         this.localIndex = localIndex;
     }
 
-    public void notifyResized(ImageResizeService svc, List<ImageFile> imageFiles) {
+    public void notifyResized(List<ImageFile> imageFiles) {
         if (Objects.isNull(imageFiles)) return;
         if ((getWidth() < 16) || (getHeight() < 16)) return;
         if ((localIndex >= imageFiles.size()) || (localIndex < 0)) return;
@@ -113,7 +118,9 @@ public class BaseImageListItem extends Canvas implements ImageResizeTaskCallback
         imageFiles.get(localIndex).setLocalIndex(globalIndex);
         imageFiles.get(localIndex).setPreviewSize(getWidth(), getHeight());
         final ImageResizeTask imageResizeTask = new ImageResizeTask(imageFiles.get(localIndex), this);
-        svc.loadImage(imageResizeTask);
+
+        final Msg<ImageResizeTask> msg = new Msg<>(imageResizeTask, 0, THIS_UUID, ImageResizeService.SERVICE_UUID, null);
+        MessageQueue.send(msg);
     }
 
     public boolean isSelected() {

@@ -45,10 +45,10 @@ public class Paginator extends HBox {
         super();
         actListener = pl;
         //this.getStylesheets().add(getClass().getResource("/style/css/paginator.css").toExternalForm());
-        this.getStyleClass().addAll("paginator_max_width", "paginator_max_height", "paginator_root_pane", "paginator_root_spacer");
+        this.getStyleClass().addAll( "paginator_max_height", "paginator_root_pane", "paginator_root_spacer");
         
         pagesContainer.setAlignment(Pos.CENTER);
-        pagesContainer.getStyleClass().addAll("paginator_max_width", "paginator_max_height", "paginator_null_pane");
+        pagesContainer.getStyleClass().addAll( "paginator_max_height", "paginator_null_pane");
         
         navToContainer.setAlignment(Pos.CENTER);
         navToContainer.getStyleClass().addAll("paginator_max_height", "paginator_null_pane", "paginator_root_spacer");
@@ -99,7 +99,7 @@ public class Paginator extends HBox {
         totalCount.getStyleClass().addAll("paginator_max_height", "paginator_total_count_label");
         totalCount.setMinWidth(Region.USE_PREF_SIZE);
 
-        if (pageinatorType == PAGINATOR_TYPE_FULL) {
+        /*if (pageinatorType == PAGINATOR_TYPE_FULL) {
             this.getChildren().addAll(
                     pagesContainer,
                     navToContainer
@@ -110,7 +110,9 @@ public class Paginator extends HBox {
             );
         } else if (pageinatorType == PAGINATOR_TYPE_SMALL) {
             this.getChildren().addAll(pagesContainer);
-        }
+        }*/
+
+        this.getChildren().addAll(pagesContainer);
 
         pagesContainer.getChildren().addAll(
                 iconStart,

@@ -14,8 +14,6 @@ import jiconfont.javafx.IconNode;
 import service.RootService;
 import service.fs.FilePusherActionListener;
 import service.fs.FilePusherTask;
-import service.resizer.ImageResizeTaskType;
-import ui.imagelist.BaseImageList;
 import ui.imagelist.FileImageList;
 import ui.simplepanel.Panel;
 import ui.simplepanel.PanelButton;

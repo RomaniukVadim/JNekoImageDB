@@ -5,7 +5,6 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import service.resizer.ImageResizeService;
 import ui.paginator.Paginator;
 import ui.paginator.PaginatorActionListener;
 
@@ -17,8 +16,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public abstract class AbstractImageList extends VBox implements PaginatorActionListener, BaseImageListItemSelectionListener {
-    private static ImageResizeService imageResizeService = null;
-
     private final ArrayList<BaseImageListItem> images = new ArrayList<>();
     private final ArrayList<ImageFile> imageFiles = new ArrayList<>();
 
@@ -29,7 +26,7 @@ public abstract class AbstractImageList extends VBox implements PaginatorActionL
     private int previewsInRow;
     private int previewsInColoumn;
 
-    private final Paginator paginator = new Paginator(this, Paginator.PAGINATOR_TYPE_FULL);
+    private final Paginator paginator = new Paginator(this, Paginator.PAGINATOR_TYPE_SMALL);
     private final StackPane rootPane = new StackPane();
     private final VBox rootVBox = new VBox();
 
@@ -43,7 +40,7 @@ public abstract class AbstractImageList extends VBox implements PaginatorActionL
                 timerCounter = 0;
                 if (sizeChanged) {
                     sizeChanged = false;
-                    images.forEach(img -> img.notifyResized(imageResizeService, imageFiles));
+                    images.forEach(img -> img.notifyResized(imageFiles));
                 }
             }
         }
@@ -53,11 +50,9 @@ public abstract class AbstractImageList extends VBox implements PaginatorActionL
     public abstract Set<ImageFile> selectedRequest();
 
     public AbstractImageList() {
-        if (Objects.isNull(imageResizeService)) imageResizeService = new ImageResizeService();
-
         getStyleClass().addAll("null_pane", "max_width", "max_height", "dark_color");
         getRootVBox().getStyleClass().addAll("null_pane", "max_width", "max_height");
-        getPaginator().getStyleClass().addAll("null_pane", "width_370px", "max_height");
+        getPaginator().getStyleClass().addAll("null_pane", "max_height");
         getRootPane().getStyleClass().addAll("null_pane", "max_width", "max_height");
 
         getRootVBox().widthProperty().addListener((e, o, n) -> resizeProc(n));
@@ -102,7 +97,7 @@ public abstract class AbstractImageList extends VBox implements PaginatorActionL
 
     private void repaint() {
         images.forEach(img -> img.setNullImage());
-        images.forEach(img -> img.notifyResized(imageResizeService, imageFiles));
+        images.forEach(img -> img.notifyResized(imageFiles));
     }
 
     public void fillImagesList(int page, int pages) {
@@ -161,10 +156,6 @@ public abstract class AbstractImageList extends VBox implements PaginatorActionL
     public void selectNone() {
         images.forEach(img -> img.setSelected(false));
         repaint();
-    }
-
-    public static void disposeStatic() {
-        if (Objects.nonNull(imageResizeService)) imageResizeService.dispose();
     }
 
     public int getCurrentPage() {

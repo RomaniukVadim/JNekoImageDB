@@ -1,4 +1,4 @@
-package utils;
+package utils.security;
 
 import org.apache.commons.codec.binary.Hex;
 
@@ -15,7 +15,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-public class CryptUtils {
+public class SecurityCryptUtils {
     private final static String SALT = "2yfg3 8i&^TF^*D &^$DTYvtuif867f&TV^Rxc76$UD^U yitC%&V^&tr87x1&TF^Rct7f7&C6c6rc7tv87h7i b08b67f6cE%Y#D^VvtC^DF%&RC^U%ivi6vtvv";
 
     public static String toHex(byte[] b) {

@@ -7,7 +7,8 @@ import jiconfont.javafx.IconNode;
 public class PanelButton extends Button {
     public PanelButton(String text, final ButtonClickListener listener) {
         super(text);
-        getStyleClass().addAll("panel_button", "max_height");
+        super.getStyleClass().clear();
+        super.getStyleClass().addAll("panel_button", "max_height");
         setOnAction(e -> listener.OnClick(e));
     }
 

@@ -1,7 +1,6 @@
 package dao;
 
-import org.apache.commons.codec.binary.Hex;
-import utils.CryptUtils;
+import utils.security.SecurityCryptUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -35,7 +34,7 @@ public class ImageDuplicateProtect implements Serializable {
         final String fileName = p.toFile().getName();
         final String fileSize = "-" + p.toFile().length();
         final byte[] hashable = (fileName + fileSize).getBytes();
-        setHashOfNameAndSize(CryptUtils.toHex(CryptUtils.sha512(hashable)));
+        setHashOfNameAndSize(SecurityCryptUtils.toHex(SecurityCryptUtils.sha512(hashable)));
     }
 
     public String getHashOfNameAndSize() {

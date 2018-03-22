@@ -2,10 +2,7 @@ package service;
 
 import dao.ImageDuplicateProtect;
 import dao.ImageId;
-import org.apache.commons.codec.binary.Hex;
 
-import org.h2.mvstore.Cursor;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistry;
@@ -17,29 +14,23 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
 
 import dao.Tag;
-import utils.CryptUtils;
-import utils.ImageUtils;
+import utils.security.SecurityCryptUtils;
 import utils.Loggable;
+import utils.workers.async_dao.DaoServiceTransaction;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 ;
 import static service.RootService.DATASTORAGE_ROOT;
 
 public class DaoService implements Loggable {
-    private final ReentrantLock lock = new ReentrantLock();
+  /*    private final ReentrantLock lock = new ReentrantLock();
 
     private final byte[] masterKey;
     private final byte[] iv;
@@ -50,20 +41,20 @@ public class DaoService implements Loggable {
     private final StandardServiceRegistry registry;
     private final HashMap<String, Session> sessions = new HashMap<>();
 
-    public DaoService(byte[] authData) {
+  public DaoService(byte[] authData) {
         if (Objects.isNull(authData)) throw new IllegalArgumentException("authData cannot be null");
 
-        final byte[] sha512 = CryptUtils.sha512(authData);
+        final byte[] sha512 = SecurityCryptUtils.sha512(authData);
         this.masterKey = Arrays.copyOfRange(sha512, 16, 48);
         this.iv = Arrays.copyOfRange(sha512, 48, 64);
-        this.storageName = CryptUtils.toHex(Arrays.copyOfRange(CryptUtils.sha512(sha512), 0, 16));
+        this.storageName = SecurityCryptUtils.toHex(Arrays.copyOfRange(SecurityCryptUtils.sha512(sha512), 0, 16));
         final String dirPath = DATASTORAGE_ROOT + File.separator + "databases" + File.separator;
         this.storageDir = new File(dirPath + storageName).getAbsoluteFile();
         new File(dirPath).mkdirs();
 
         final String dbURI = "jdbc:h2:" + this.storageDir + ";CIPHER=AES;";
         try {
-            final String dbPassword = CryptUtils.toHex(Arrays.copyOfRange(CryptUtils.sha256(sha512), 0, 21));
+            final String dbPassword = SecurityCryptUtils.toHex(Arrays.copyOfRange(SecurityCryptUtils.sha256(sha512), 0, 21));
             final Properties prop = new Properties();
             prop.setProperty("hibernate.connection.driver_class", "org.h2.Driver");
             prop.setProperty("hibernate.hbm2ddl.auto", "update");
@@ -137,11 +128,11 @@ public class DaoService implements Loggable {
         }
 
         return s;
-    }
+    }*/
 
     /***********************************************************************************************************************/
 
-    public synchronized boolean hasDuplicates(Path p) {
+   /* public synchronized boolean hasDuplicates(Path p) {
         final ImageDuplicateProtect ip1 = new ImageDuplicateProtect(p);
         List list = getSession()
                 .createCriteria(ImageDuplicateProtect.class)
@@ -159,8 +150,8 @@ public class DaoService implements Loggable {
             return true;
         });
         return;
-    }
-
+    }*/
+/*
     public synchronized List<ImageId> getImageIdList(long[] in) {
         final Long[] array = new Long[in.length];
         for (int i=0; i<in.length; i++) array[i] = in[i];
@@ -171,7 +162,7 @@ public class DaoService implements Loggable {
                 .list();
     }
 
-    /* I don't use LIMIT(A,B), it's too slow; This hack was increase program speed up to 10x-30x, but required some memory; */
+     I don't use LIMIT(A,B), it's too slow; This hack was increase program speed up to 10x-30x, but required some memory;
     public long[] generateCache() {
         final List list = getSession()
                 .createCriteria(ImageId.class)
@@ -188,7 +179,7 @@ public class DaoService implements Loggable {
         }
         return null;
     }
-
+*/
 
 
 
@@ -201,7 +192,7 @@ public class DaoService implements Loggable {
 
 
 
-
+/*
 
 
 
@@ -209,5 +200,5 @@ public class DaoService implements Loggable {
         sessions.values().forEach(session -> session.close());
         currSF.close();
         StandardServiceRegistryBuilder.destroy(registry);
-    }
+    }*/
 }

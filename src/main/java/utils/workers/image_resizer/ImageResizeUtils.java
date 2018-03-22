@@ -1,4 +1,4 @@
-package utils;
+package utils.workers.image_resizer;
 
 import org.imgscalr.Scalr;
 
@@ -13,8 +13,11 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
-public class ImageUtils {
+import com.intellij.util.ui.UIUtil;
+
+public class ImageResizeUtils {
     public static final Scalr.Method quality = Scalr.Method.SPEED;
+    public static final Color COLOR_WHITE = new Color(255, 255, 255);
 
     public static Dimension getImageDimension(File imgFile) throws IOException {
         int pos = imgFile.getName().lastIndexOf(".");
@@ -48,10 +51,10 @@ public class ImageUtils {
                     w_size = image2.getWidth(null),
                     h_size = image2.getHeight(null);
 
-            final BufferedImage image = new BufferedImage(w_size, h_size, BufferedImage.TYPE_INT_RGB);
+            final BufferedImage image = UIUtil.createImage(w_size, h_size, BufferedImage.TYPE_INT_RGB);
             final Graphics2D g2d = image.createGraphics();
-            g2d.setBackground(new Color(255, 255, 255));
-            g2d.setColor(new Color(255, 255, 255));
+            g2d.setBackground(COLOR_WHITE);
+            g2d.setColor(COLOR_WHITE);
             g2d.fillRect(0, 0, w_size, h_size);
             g2d.drawImage(image2, 0, 0, null);
             g2d.dispose();
@@ -97,10 +100,10 @@ public class ImageUtils {
                 w_size = image2.getWidth(null),
                 h_size = image2.getHeight(null);
 
-        final BufferedImage srcImage = new BufferedImage(w_size, h_size, BufferedImage.TYPE_INT_RGB);
+        final BufferedImage srcImage = UIUtil.createImage(w_size, h_size, BufferedImage.TYPE_INT_RGB);
         final Graphics2D g2d = srcImage.createGraphics();
-        g2d.setBackground(new Color(255, 255, 255));
-        g2d.setColor(new Color(255, 255, 255));
+        g2d.setBackground(COLOR_WHITE);
+        g2d.setColor(COLOR_WHITE);
         g2d.fillRect(0, 0, w_size, h_size);
         g2d.drawImage(image2, 0, 0, null);
         g2d.dispose();

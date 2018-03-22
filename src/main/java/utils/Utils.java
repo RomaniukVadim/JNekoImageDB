@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class Utils {
 
-    public static Set<String> createSet(String ... s) {
+    public static <T> Set<T> createSet(T ... s) {
         return Arrays.asList(s).stream().filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
@@ -26,7 +26,7 @@ public class Utils {
 
     public static void setBlur(Pane p) {
         final ColorAdjust adj = new ColorAdjust(0, -0.9, -0.5, 0);
-        final GaussianBlur blur = new GaussianBlur(22); // 55 is just to show edge effect more clearly.
+        final GaussianBlur blur = new GaussianBlur(22);
         adj.setInput(blur);
         p.setEffect(adj);
     }

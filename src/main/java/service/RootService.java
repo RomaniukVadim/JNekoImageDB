@@ -6,7 +6,10 @@ import dao.AppSettings;
 import service.fs.EncryptedCacheAccessService;
 import service.fs.EncryptedFileAccessService;
 import ui.dialog.ImportImagesDialog;
-import ui.imagelist.AbstractImageList;
+import utils.messages.MessageQueue;
+import utils.security.SecurityService;
+import utils.workers.async_dao.AsyncDaoService;
+import utils.workers.image_resizer.ImageResizeService;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,26 +27,26 @@ public class RootService {
     private static final Gson gson = new Gson();
     private static final Path appConfigPath = new File(DATASTORAGE_ROOT + "config.json").toPath();
 
-    private static final AuthService authService = new AuthService();
+    //private static final SecurityService authService = new SecurityService();
 
     private static EncryptedCacheAccessService encryptedCacheAccessService;
     private static EncryptedFileAccessService encryptedFileAccessService;
     private static ImportImagesDialog importImagesDialog;
-    private static DaoService daoService;
 
     private static AppSettings appSettings;
 
     public static void dispose() {
         if (Objects.nonNull(importImagesDialog)) importImagesDialog.dispose();
         if (Objects.nonNull(encryptedFileAccessService)) encryptedFileAccessService.dispose();
-        if (Objects.nonNull(daoService)) daoService.dispose();
-        AbstractImageList.disposeStatic();
+
+        AsyncDaoService.dispose();
+        ImageResizeService.dispose();
+        MessageQueue.dispose();
     }
 
     public static void initAllEncryptedStorages(byte[] authData) {
         if (Objects.isNull(encryptedFileAccessService)) encryptedFileAccessService = new EncryptedFileAccessService(authData);
         if (Objects.isNull(encryptedCacheAccessService)) encryptedCacheAccessService = new EncryptedCacheAccessService(authData);
-        if (Objects.isNull(daoService)) daoService = new DaoService(authData);
         if (Objects.isNull(importImagesDialog)) importImagesDialog = new ImportImagesDialog();
     }
 
@@ -52,18 +55,9 @@ public class RootService {
         return encryptedFileAccessService;
     }
 
-    public static AuthService getAuthService() {
-        return authService;
-    }
-
     public static EncryptedCacheAccessService getCacheService() {
         if (Objects.isNull(encryptedCacheAccessService)) throw new IllegalStateException("EncryptedCacheAccessService need init before use");
         return encryptedCacheAccessService;
-    }
-
-    public static DaoService getDaoService() {
-        if (Objects.isNull(daoService)) throw new IllegalStateException("DaoService need init before use");
-        return daoService;
     }
 
     public static AppSettings getAppSettings() {

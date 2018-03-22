@@ -1,4 +1,4 @@
-package service.resizer;
+package utils.workers.image_resizer;
 
 import dao.ImageId;
 import fao.ImageFile;
@@ -6,81 +6,60 @@ import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import service.RootService;
-import utils.ImageUtils;
 import utils.Loggable;
+import utils.messages.MessageQueue;
+import utils.messages.Msg;
+import utils.messages.MultithreadedSingletone;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.*;
 
-public class ImageResizeService implements Loggable {
-    private final ExecutorService executor;
-    private final LinkedBlockingDeque<ImageResizeTask> queue = new LinkedBlockingDeque<>();
+import javax.imageio.ImageIO;
 
-    private final Runnable thread = () -> {
-        while(true) {
-            try {
-                final ImageResizeTask task = queue.pollLast(9999, TimeUnit.DAYS);
-                final Image img = Optional.ofNullable(RootService.getCacheService().readCacheElement(task.getImageFile()))
-                        .map(b -> new Image(new ByteArrayInputStream(b)))
-                        .orElse(null);
-                if (Objects.nonNull(img)) {
-                    Platform.runLater(() -> task.getTaskCallback().onImageResized(img, task.getImageFile().getLocalIndex()));
-                } else {
-                    switch (task.getImageFile().getType()) {
-                        case LOCAL_FS:
-                            processLocalFsImage(task);
-                            break;
-                        case INTERNAL_DATABASE:
-                            processInternalDBImage(task);
-                            L("processInternalDBImage(task)");
-                            break;
-                        case HTTP:
+public class ImageResizeService extends MultithreadedSingletone<ImageResizeTask> implements Loggable {
+    private static ImageResizeService imageResizeService;
 
-                            break;
-                    }
-                }
-            } catch (InterruptedException e) {
-                return;
-            } catch (Exception e) {
-                System.err.println("ERROR: " + e.getClass().getSimpleName() + " || " + e.getMessage());
-            }
-        }
-    };
-
-    public ImageResizeService() {
-        int cores = Runtime.getRuntime().availableProcessors();
-        if (cores <= 0) throw new IllegalStateException("cannot get CPUs count");
-
-        executor = Executors.newFixedThreadPool(cores);
-        for (int i=0; i<cores; i++) executor.submit(thread);
+    public static void init() {
+        if (Objects.isNull(imageResizeService)) imageResizeService = new ImageResizeService();
     }
 
-    public void dispose() {
-        executor.shutdownNow();
+    public static void dispose() {
+        if (Objects.nonNull(imageResizeService)) imageResizeService.disposeInstance();
     }
 
-    public void loadImages(CopyOnWriteArrayList<ImageResizeTask> images) {
-        images.forEach(e -> {
-            try {
-                if (!queue.contains(e)) queue.putLast(e);
-            } catch (InterruptedException e1) { }
-        });
+    private ImageResizeService() {
+        super();
+        MessageQueue.subscribe(SERVICE_UUID, (Msg<ImageResizeTask> msg) -> pushTask(msg.getPayload()));
     }
 
-    public void loadImage(ImageResizeTask image) {
+    @Override
+    public void processQueue(ImageResizeTask element) {
         try {
-            if (!queue.contains(image)) queue.putLast(image);
-        } catch (InterruptedException e1) { }
-    }
+            final Image img = Optional.ofNullable(RootService.getCacheService().readCacheElement(element.getImageFile()))
+                    .map(b -> new Image(new ByteArrayInputStream(b)))
+                    .orElse(null);
+            if (Objects.nonNull(img)) {
+                Platform.runLater(() -> element.getTaskCallback().onImageResized(img, element.getImageFile().getLocalIndex()));
+            } else {
+                switch (element.getImageFile().getType()) {
+                case LOCAL_FS:
+                    processLocalFsImage(element);
+                    break;
+                case INTERNAL_DATABASE:
+                    processInternalDBImage(element);
+                    break;
+                case HTTP:
 
-    public boolean isFree() {
-        return queue.isEmpty();
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("ERROR: " + e.getClass().getSimpleName() + " || " + e.getMessage());
+        }
     }
 
     private void processInternalDBImage(ImageResizeTask task) throws IOException {
@@ -97,7 +76,7 @@ public class ImageResizeService implements Loggable {
             return;
         }
 
-        final BufferedImage bi = ImageUtils.resizeImage(bufferedImageOriginal,
+        final BufferedImage bi = ImageResizeUtils.resizeImage(bufferedImageOriginal,
                 Math.round(task.getImageFile().getImageFileDimension().getPreviewWidth()),
                 Math.round(task.getImageFile().getImageFileDimension().getPreviewHeight()), true);
 
@@ -110,7 +89,7 @@ public class ImageResizeService implements Loggable {
     private void processLocalFsImage(ImageResizeTask task) throws IOException {
         final ImageFile imageFile = task.getImageFile();
         final BufferedImage bi = Optional.ofNullable(imageFile.getImagePath().toAbsolutePath().toFile())
-                .map(file -> ImageUtils.resizeImage(file,
+                .map(file -> ImageResizeUtils.resizeImage(file,
                         Math.round(imageFile.getImageFileDimension().getPreviewWidth()),
                         Math.round(imageFile.getImageFileDimension().getPreviewHeight()), true)).orElse(null);
         if (Objects.isNull(bi)) {

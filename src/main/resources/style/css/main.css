@@ -44,6 +44,12 @@
 	-fx-min-height: 48px;
 }
 
+.height_32px {
+	-fx-pref-height: 32px;
+	-fx-max-height: 32px;
+	-fx-min-height: 32px;
+}
+
 .null_pane {
     -fx-background-radius: 0px;
     -fx-background-insets: 0, 0, 0, 0;
@@ -74,7 +80,6 @@
 }
 
 .dialog_pane,
-.null_pane,
 .button_box_pane {
 	-fx-background-color: #FFFFFF;
 }
@@ -179,7 +184,42 @@
 
 /************************************************************* MISC *******************************************************************/
 
+.panel_main_1 {
+	-fx-pref-width: 9999px;
+	-fx-max-width: 9999px;
+	-fx-min-width: 1px;
+    -fx-pref-height: 64px;
+    -fx-min-height: 64px;
+    -fx-max-height: 64px;
+	-fx-background-color: #333;
+    -fx-background-radius: 0px;
+    -fx-background-insets: 0, 0, 0, 0;
+     -fx-border-color: #B00;
+	-fx-border-radius: 0;
+	-fx-border-width: 0px 0 4px 0px;
+    -fx-border-insets: 0;
+	-fx-padding: 0px;
+}
+
+.panel_bottom_1 {
+	-fx-pref-width: 9999px;
+	-fx-max-width: 9999px;
+	-fx-min-width: 1px;
+    -fx-pref-height: 32px;
+    -fx-min-height: 32px;
+    -fx-max-height: 32px;
+	-fx-background-color: #333;
+    -fx-background-radius: 0px;
+    -fx-background-insets: 0, 0, 0, 0;
+     -fx-border-color: #B00;
+	-fx-border-radius: 0;
+	-fx-border-width: 0px 0 0px 0px;
+    -fx-border-insets: 0;
+	-fx-padding: 0px;
+}
+
 .panel_pane {
+    -fx-background-color: #333;
     -fx-background-radius: 0px;
     -fx-background-insets: 0, 0, 0, 0;
 	-fx-border-radius: 0;
@@ -189,7 +229,7 @@
 }
 
 .panel_button {
-    -fx-background-color: #eee;
+    -fx-background-color: transparent;
     -fx-background-radius: 0px;
     -fx-background-insets: 0, 0, 0, 0;
     -fx-border-radius: 0;
@@ -198,13 +238,26 @@
     -fx-border-insets: 0;
     -fx-padding: 0px;
     -fx-font-size: 16px;
-    -fx-text-fill: #333;
-    -fx-font-family: "Linux Biolinum Bold";
+    -fx-text-fill: #FFF;
+    -fx-font-family: "Linux Biolinum";
     -fx-font-weight:bold;
     -fx-pref-width: 167px;
     -fx-max-width: 167px;
     -fx-min-width: 167px;
-    -fx-margin: 0 4px 0 4px;
+    -fx-margin: 0 0px 0 0px;
+    -fx-pref-height: 9999px;
+    -fx-max-height: 9999px;
+    -fx-min-height: 1px;
+}
+
+.panel_separator {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0px;
+    -fx-background-insets: 0, 0, 0, 0;
+	-fx-border-radius: 0;
+	-fx-border-width: 0px 0 0 0px;
+    -fx-border-insets: 0;
+	-fx-padding: 0;
 }
 
 .panel_button:hover {
@@ -214,7 +267,7 @@
 }
 
 .panel_button_icon {
-    -fx-icon-size: 32px;
+    -fx-icon-size: 24px;
 }
 
 .panel_button_icon_refresh {
@@ -369,13 +422,13 @@ IconNode {
 .menu_null_container {
 	-fx-spacing: 6px;
     -fx-padding: 0;
-    -fx-background-color: transparent;
+    -fx-background-color: #555;
     -fx-background-radius: 0px;
     -fx-background-insets: 0, 0, 0, 0;
 	-fx-border-radius: 0;
-	-fx-border-width: 0px 0 0 0px;
+	-fx-border-width: 0px 4px 0 0px;
     -fx-border-insets: 0;
-	-fx-border-color: #bbb;
+	-fx-border-color: #B00;
 }
 
 .menu_group_header {
@@ -388,7 +441,7 @@ IconNode {
     -fx-background-radius: 0px;
     -fx-background-insets: 0, 0, 0, 0;
 	-fx-border-radius: 0;
-	-fx-border-width: 0px 0 1px 0;
+	-fx-border-width: 0px 0 0px 0;
     -fx-border-insets: 0;
 	-fx-border-color: #bbb;
 }
@@ -401,15 +454,15 @@ IconNode {
 	-fx-border-width: 0px;
     -fx-border-insets: 0;
 	-fx-border-color: transparent;
-	-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 11, 0, 0, 0);
+	/*-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 11, 0, 0, 0);*/
 }
 
 .menu_group_container_red {
-	-fx-background-color: #CC5555;
+	-fx-background-color: #B00;
 }
 
 .menu_group_container_green {
-	-fx-background-color: #55CC55;
+	-fx-background-color: #B00;
 }
 
 .menu_item {
@@ -525,11 +578,11 @@ IconNode {
 	-fx-border-radius: 0;
 	-fx-border-width: 0px 0 0 0px;
     -fx-border-insets: 0;
-	-fx-padding: 3px;
+	-fx-padding: 0px;
 }
 
 .paginator_icon {
-	-fx-fill: #000;
+	-fx-fill: #fff;
 	-fx-icon-size: 24px;
 	-fx-pref-width: 32px;
 	-fx-max-width: 32px;
@@ -570,7 +623,7 @@ IconNode {
     -fx-border-insets: 0;
 	-fx-padding: 0 11px 0 11px;
 	-fx-font-size: 14px;
-    -fx-text-fill: #000;
+    -fx-text-fill: #fff;
 	-fx-font-family: "Linux Biolinum Bold";
 }
 
