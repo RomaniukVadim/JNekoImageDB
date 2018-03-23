@@ -11,6 +11,8 @@ import javafx.stage.Stage;
 import jiconfont.icons.GoogleMaterialDesignIcons;
 import jiconfont.javafx.IconFontFX;
 import service.RootService;
+import service.img_worker.Hibernate;
+import service.img_worker.LocalImageServiceImpl;
 import ui.activity.AbstractActivity;
 import ui.activity.AllImagesActivity;
 import ui.dialog.YesNoDialog;
@@ -20,7 +22,7 @@ import ui.menu.MenuItem;
 import ui.simplepanel.Panel;
 import utils.messages.MessageQueue;
 import utils.messages.Msg;
-import utils.security.SecurityService;
+import service.img_worker.SecurityService;
 import utils.workers.async_dao.AsyncDaoService;
 import utils.workers.async_fs.AsyncCacheService;
 import utils.workers.async_fs.AsyncFsService;
@@ -52,6 +54,9 @@ public class Main extends Application {
     private Panel panel = new Panel("panel_main_1", imgLogoNode, subPanelMain);
 
     private void dispose() {
+        LocalImageServiceImpl.dispose();
+        Hibernate.getInstance().dispose();
+        MessageQueue.dispose();
         System.exit(0);
     }
 
@@ -66,11 +71,13 @@ public class Main extends Application {
 
         MessageQueue.init();
         SecurityService.init();
-        ImageResizeService.init();
         if (SecurityService.createAuthDataWithUIPassworRequest() == null) dispose();
-        AsyncDaoService.init();
-        AsyncFsService.init();
-        AsyncCacheService.init();
+
+
+
+
+        ImageResizeService.init();
+
     }
 
     @Override

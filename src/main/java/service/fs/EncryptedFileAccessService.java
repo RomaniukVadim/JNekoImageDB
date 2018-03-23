@@ -1,8 +1,7 @@
 package service.fs;
 
 import javafx.application.Platform;
-import service.RootService;
-import utils.security.SecurityCryptUtils;
+import service.img_worker.SecurityCryptUtils;
 import utils.workers.async_dao.DaoServiceReader;
 
 import java.io.File;

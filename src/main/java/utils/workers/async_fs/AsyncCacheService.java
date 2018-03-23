@@ -2,8 +2,8 @@ package utils.workers.async_fs;
 
 import dao.ImageId;
 import dao.ImgPreviewId;
-import fao.ImageFile;
 import fao.ImageFileDimension;
+import service.img_worker.FsCacheIO;
 import utils.Loggable;
 import utils.messages.MessageQueue;
 import utils.messages.Msg;
@@ -12,7 +12,6 @@ import utils.workers.async_dao.AsyncDaoService;
 import utils.workers.async_dao.AsyncDaoTransaction;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.UUID;
@@ -66,7 +65,7 @@ public class AsyncCacheService extends MultithreadedSingletone<AsyncCacheService
 	}
 
 	private static AsyncCacheService asyncFsService;
-	private final CacheIO cacheIO;
+	private final FsCacheIO cacheIO;
 
 	public static void init() {
 		if (asyncFsService == null) asyncFsService = new AsyncCacheService();
@@ -95,7 +94,7 @@ public class AsyncCacheService extends MultithreadedSingletone<AsyncCacheService
 
 	protected AsyncCacheService() {
 		super();
-		cacheIO = new CacheIO();
+		cacheIO = new FsCacheIO();
 
 		MessageQueue.subscribe(SERVICE_UUID, (Msg<Task> msg) -> {
 			pushTask(msg.getPayload());
@@ -107,7 +106,7 @@ public class AsyncCacheService extends MultithreadedSingletone<AsyncCacheService
 		super.disposeInstance();
 	}
 
-	public CacheIO getCacheIO() {
+	public FsCacheIO getCacheIO() {
 		return cacheIO;
 	}
 }

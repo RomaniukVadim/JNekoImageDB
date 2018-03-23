@@ -19,12 +19,13 @@ import org.hibernate.exception.ConstraintViolationException;
 import dao.ImageDuplicateProtect;
 import dao.ImageId;
 import dao.Tag;
+import service.img_worker.HibernateTransaction;
 import utils.Loggable;
 import utils.messages.MessageQueue;
 import utils.messages.Msg;
 import utils.messages.MultithreadedSingletone;
-import utils.security.SecurityCryptUtils;
-import utils.security.SecurityService;
+import service.img_worker.SecurityCryptUtils;
+import service.img_worker.SecurityService;
 
 public class AsyncDaoService extends MultithreadedSingletone<AsyncDaoTransaction<?>> implements Loggable {
 	private static AsyncDaoService asyncDaoService;
@@ -148,7 +149,7 @@ public class AsyncDaoService extends MultithreadedSingletone<AsyncDaoTransaction
 		}
 	}
 
-	protected void transaction(DaoServiceTransaction daoServiceTransaction) {
+	protected void transaction(HibernateTransaction daoServiceTransaction) {
 		final Session s = getSession();
 		s.beginTransaction();
 		try {

@@ -1,20 +1,17 @@
-package utils.workers.async_fs;
-
-import utils.security.SecurityCryptUtils;
-import utils.security.SecurityService;
+package service.img_worker;
 
 import java.io.File;
 import java.util.Arrays;
 
 import static service.RootService.DATASTORAGE_ROOT;
 
-public abstract class AbstractIO {
+public abstract class FsAbstractIO {
     final byte[] masterKey;
     final byte[] iv;
     final String storageName;
     final File storageDir;
 
-    AbstractIO(String folderName) {
+    FsAbstractIO(String folderName) {
         final byte[] sha512 = SecurityCryptUtils.sha512(SecurityService.getAuthData());
         this.masterKey = Arrays.copyOfRange(sha512, 0, 32);
         this.iv = Arrays.copyOfRange(sha512, 32, 48);

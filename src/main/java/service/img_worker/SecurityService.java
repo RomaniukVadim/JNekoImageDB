@@ -1,4 +1,4 @@
-package utils.security;
+package service.img_worker;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -6,7 +6,6 @@ import dao.AuthInfo;
 import javafx.application.Platform;
 import ui.dialog.PasswordDialog;
 import ui.dialog.YesNoDialog;
-import utils.security.SecurityCryptUtils;
 
 import java.io.File;
 import java.io.IOException;

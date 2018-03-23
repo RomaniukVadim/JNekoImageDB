@@ -1,7 +1,6 @@
-package utils.workers.async_fs;
+package service.img_worker;
 
 import utils.Loggable;
-import utils.security.SecurityCryptUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,13 +10,13 @@ import java.util.Objects;
 
 import static java.nio.file.StandardOpenOption.CREATE;
 
-public class FilesIO extends AbstractIO implements Loggable {
-	protected FilesIO() {
+public class FsStorageIO extends FsAbstractIO implements Loggable {
+	protected FsStorageIO() {
 		super("data");
 	}
 
 	public byte[] read(String id) throws IOException {
-		final String storagePath = FSUtils.getStoragePath(this.storageDir, id);
+		final String storagePath = FsUtils.getStoragePath(this.storageDir, id);
 
 		final File file = new File(storagePath);
 		if (!file.isFile()) throw new IOException("File not a regular!");
@@ -42,7 +41,7 @@ public class FilesIO extends AbstractIO implements Loggable {
 		final byte[] encrypted = crypt(data);
 		final String hashString = SecurityCryptUtils.toHex(hashOfEncryptedData);
 
-		final String storagePath = FSUtils.getStoragePath(this.storageDir, hashString);
+		final String storagePath = FsUtils.getStoragePath(this.storageDir, hashString);
 		final Path fileForSave = new File(storagePath).getAbsoluteFile().toPath();
 
 		Files.write(fileForSave, encrypted, CREATE);

@@ -1,33 +1,8 @@
 package service;
 
-import dao.ImageDuplicateProtect;
-import dao.ImageId;
-
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.exception.ConstraintViolationException;
-
-import dao.Tag;
-import utils.security.SecurityCryptUtils;
 import utils.Loggable;
-import utils.workers.async_dao.DaoServiceTransaction;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.concurrent.locks.ReentrantLock;
 ;
-import static service.RootService.DATASTORAGE_ROOT;
 
 public class DaoService implements Loggable {
   /*    private final ReentrantLock lock = new ReentrantLock();
@@ -95,7 +70,7 @@ public class DaoService implements Loggable {
         }
     }
 
-    public void transaction(DaoServiceTransaction daoServiceTransaction) {
+    public void transaction(HibernateTransaction daoServiceTransaction) {
         final Session s = getSession();
         s.beginTransaction();
         try {

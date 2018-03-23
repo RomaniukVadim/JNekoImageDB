@@ -1,4 +1,4 @@
-package utils.workers.async_fs;
+package service.img_worker;
 
 import fao.ImageFile;
 import utils.Utils;
@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
-public class FSUtils {
+public class FsUtils {
     public static final int STORAGE_DEEP = 4;
     private static final Set<String> allowedExtentions = Utils.createSet(".jpg", ".jpeg", ".jpe", ".png");
 

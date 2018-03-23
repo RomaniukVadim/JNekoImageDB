@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import dao.ImageId;
-import fao.ImageFile;
+import service.img_worker.FsStorageIO;
 import utils.Loggable;
 import utils.messages.MessageQueue;
 import utils.messages.Msg;
@@ -36,7 +36,7 @@ public class AsyncFsService extends MultithreadedSingletone<AsyncFsService.Task>
 	}
 
 	private static AsyncFsService asyncFsService;
-	private final FilesIO filesIO;
+	private final FsStorageIO filesIO;
 
 	public static void init() {
 		if (asyncFsService == null) asyncFsService = new AsyncFsService();
@@ -68,7 +68,7 @@ public class AsyncFsService extends MultithreadedSingletone<AsyncFsService.Task>
 
 	protected AsyncFsService() {
 		super();
-		filesIO = new FilesIO();
+		filesIO = new FsStorageIO();
 
 		MessageQueue.subscribe(SERVICE_UUID, (Msg<Task> msg) -> {
 			pushTask(msg.getPayload());
@@ -80,7 +80,7 @@ public class AsyncFsService extends MultithreadedSingletone<AsyncFsService.Task>
 		super.disposeInstance();
 	}
 
-	public FilesIO getFilesIO() {
+	public FsStorageIO getFilesIO() {
 		return filesIO;
 	}
 }

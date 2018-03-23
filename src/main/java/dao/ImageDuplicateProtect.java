@@ -1,6 +1,6 @@
 package dao;
 
-import utils.security.SecurityCryptUtils;
+import service.img_worker.SecurityCryptUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
