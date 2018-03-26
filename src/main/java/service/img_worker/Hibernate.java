@@ -14,9 +14,10 @@ import org.hibernate.exception.ConstraintViolationException;
 import dao.ImageDuplicateProtect;
 import dao.ImageId;
 import dao.Tag;
+import service.img_worker.io.IOCache;
 import utils.Loggable;
 
-public class Hibernate extends FsAbstractIO implements Loggable {
+public class Hibernate extends IOCache implements Loggable {
 	private static Hibernate hibernate;
 
 	private SessionFactory currSF;

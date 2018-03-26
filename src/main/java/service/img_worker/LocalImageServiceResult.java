@@ -5,18 +5,40 @@ import java.util.List;
 import java.util.Map;
 
 import javafx.scene.image.Image;
+import utils.Loggable;
 
-public class LocalImageServiceResult {
+public class LocalImageServiceResult implements Loggable {
 	private Path path;
 	private Image image;
 	private Exception exception;
 	private String errorText;
 	private List<Path> files;
 	private Map<String, Object> meta;
+	private Long id;
 
-	public LocalImageServiceResult(Path path, String errorText) {
+	public LocalImageServiceResult(Path path, Long id, String errorText, Exception e) {
 		this.path = path;
 		this.errorText = errorText;
+		this.exception = e;
+		this.id = id;
+		W(errorText + "; error: " + e.getMessage());
+	}
+
+	public LocalImageServiceResult(Path path, Long id, String errorText) {
+		this.path = path;
+		this.errorText = errorText;
+		this.id = id;
+		W(errorText);
+	}
+
+	public LocalImageServiceResult(Path path, Image image) {
+		this.path = path;
+		this.image = image;
+	}
+
+	public LocalImageServiceResult(Long id, Image image) {
+		this.id = id;
+		this.image = image;
 	}
 
 	public Path getPath() {
@@ -65,5 +87,13 @@ public class LocalImageServiceResult {
 
 	public void setErrorText(String errorText) {
 		this.errorText = errorText;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 }

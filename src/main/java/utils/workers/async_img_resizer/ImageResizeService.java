@@ -6,12 +6,11 @@ import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import service.RootService;
+import service.img_worker.ImageResizeUtils;
 import utils.Loggable;
 import utils.messages.MessageQueue;
 import utils.messages.Msg;
 import utils.messages.MultithreadedSingletone;
-import utils.workers.async_dao.AsyncDaoService;
-import utils.workers.async_dao.DaoServiceReader;
 import utils.workers.async_fs.AsyncFsService;
 
 import java.awt.image.BufferedImage;
@@ -76,7 +75,7 @@ public class ImageResizeService extends MultithreadedSingletone<ImageResizeTask>
 
 
 
-
+/*
 
         try {
             final Image img = Optional.ofNullable(RootService.getCacheService().readCacheElement(element.getImageFile()))
@@ -99,7 +98,7 @@ public class ImageResizeService extends MultithreadedSingletone<ImageResizeTask>
             }
         } catch (Exception e) {
             System.err.println("ERROR: " + e.getClass().getSimpleName() + " || " + e.getMessage());
-        }
+        }*/
     }
 
     private void processInternalDBImage(ImageResizeTask task) throws IOException {
@@ -109,7 +108,7 @@ public class ImageResizeService extends MultithreadedSingletone<ImageResizeTask>
             return;
         }
 
-        final byte[] file = RootService.getFileService().readDBFile(imageId.getImgId());
+        final byte[] file = null; // RootService.getFileService().readDBFile(imageId.getImgId());
         final BufferedImage bufferedImageOriginal = ImageIO.read(new ByteArrayInputStream(file));
         if (Objects.isNull(bufferedImageOriginal)){
             Platform.runLater(() -> task.getTaskCallback().onError(null, task.getImageFile().getLocalIndex()));

@@ -5,10 +5,15 @@ import java.nio.file.Path;
 import fao.ImageFileDimension;
 
 public class LocalImageServiceTask {
+	public static enum Type {
+		CREATE_PREVIEW, UPLOAD_TO_DATABASE, DOWNLOAD_FROM_DATABASE
+	}
+
 	private Path path;
-	private String databaseId;
+	private Long databaseId;
 	private ImageFileDimension imageFileDimension;
 	private LocalImageServiceCallback callback;
+	private Type taskType;
 
 	public Path getPath() {
 		return path;
@@ -18,11 +23,11 @@ public class LocalImageServiceTask {
 		this.path = path;
 	}
 
-	public String getDatabaseId() {
+	public Long getDatabaseId() {
 		return databaseId;
 	}
 
-	public void setDatabaseId(String databaseId) {
+	public void setDatabaseId(Long databaseId) {
 		this.databaseId = databaseId;
 	}
 
@@ -40,5 +45,13 @@ public class LocalImageServiceTask {
 
 	public void setImageFileDimension(ImageFileDimension imageFileDimension) {
 		this.imageFileDimension = imageFileDimension;
+	}
+
+	public Type getTaskType() {
+		return taskType;
+	}
+
+	public void setTaskType(Type taskType) {
+		this.taskType = taskType;
 	}
 }

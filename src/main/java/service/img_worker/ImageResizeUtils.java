@@ -1,4 +1,4 @@
-package utils.workers.async_img_resizer;
+package service.img_worker;
 
 import org.imgscalr.Scalr;
 
