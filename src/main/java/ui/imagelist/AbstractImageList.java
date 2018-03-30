@@ -8,6 +8,7 @@ import javafx.scene.layout.VBox;
 import ui.paginator.Paginator;
 import ui.paginator.PaginatorActionListener;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -17,7 +18,7 @@ import java.util.TimerTask;
 
 public abstract class AbstractImageList extends VBox implements PaginatorActionListener, BaseImageListItemSelectionListener {
     private final ArrayList<BaseImageListItem> images = new ArrayList<>();
-    private final ArrayList<ImageFile> imageFiles = new ArrayList<>();
+    private final ArrayList<Path> imageFiles = new ArrayList<>();
 
     private int currentPage;
     private int pagesCount;
@@ -46,8 +47,8 @@ public abstract class AbstractImageList extends VBox implements PaginatorActionL
         }
     };
 
-    public abstract List<ImageFile> imageRequest(int page, int pages);
-    public abstract Set<ImageFile> selectedRequest();
+    public abstract List<Path> imageRequest(int page, int pages);
+    public abstract Set<Path> selectedRequest();
 
     public AbstractImageList() {
         getStyleClass().addAll("null_pane", "max_width", "max_height", "dark_color");
@@ -103,8 +104,8 @@ public abstract class AbstractImageList extends VBox implements PaginatorActionL
     public void fillImagesList(int page, int pages) {
         imageFiles.clear();
 
-        final List<ImageFile> imagesReq = imageRequest(page, pages);
-        final Set<ImageFile> selectedReq = selectedRequest();
+        final List<Path> imagesReq = imageRequest(page, pages);
+        final Set<Path> selectedReq = selectedRequest();
 
         if (Objects.nonNull(imagesReq) && Objects.nonNull(selectedReq)) {
             imageFiles.addAll(imagesReq);

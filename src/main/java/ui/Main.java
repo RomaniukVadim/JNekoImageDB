@@ -1,5 +1,11 @@
 package ui;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -13,6 +19,7 @@ import jiconfont.javafx.IconFontFX;
 import service.RootService;
 import service.img_worker.Hibernate;
 import service.img_worker.LocalImageServiceImpl;
+import service.img_worker.SecurityService;
 import ui.activity.AbstractActivity;
 import ui.activity.AllImagesActivity;
 import ui.dialog.YesNoDialog;
@@ -22,22 +29,10 @@ import ui.menu.MenuItem;
 import ui.simplepanel.Panel;
 import utils.messages.MessageQueue;
 import utils.messages.Msg;
-import service.img_worker.SecurityService;
-import utils.workers.async_dao.AsyncDaoService;
-import utils.workers.async_fs.AsyncCacheService;
-import utils.workers.async_fs.AsyncFsService;
-import utils.workers.async_img_resizer.ImageResizeService;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
 
 public class Main extends Application {
     public static final UUID TOP_PANEL_UUID = UUID.randomUUID();
     public static final int TOP_PANEL_ACTION_ADD_NODES = 1;
-    public static final int TOP_PANEL_ACTION_REMOVE_NODES = 2;
 
     private static final Map<String, AbstractActivity> activities = new HashMap<>();
 
@@ -72,12 +67,6 @@ public class Main extends Application {
         MessageQueue.init();
         SecurityService.init();
         if (SecurityService.createAuthDataWithUIPassworRequest() == null) dispose();
-
-
-
-
-        ImageResizeService.init();
-
     }
 
     @Override

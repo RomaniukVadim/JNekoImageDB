@@ -3,24 +3,24 @@ package service.img_worker.io;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import fao.ImageFileDimension;
+import dao.ImageDimension;
 
 public class IOCache extends IOAbstract {
 	public IOCache() {
 		super("cache");
 	}
 
-	public byte[] readFromFs(Path p, ImageFileDimension d) {
+	public byte[] readFromFs(Path p, ImageDimension d) {
 		final String idLine = genIdLine(p, d);
 		return read(idLine);
 	}
 
-	public byte[] readFromDb(long id, ImageFileDimension d) {
+	public byte[] readFromDb(long id, ImageDimension d) {
 		final String idLine = getDbIdLine(id, d);
 		return read(idLine);
 	}
 
-	public String writeFromFs(Path p, ImageFileDimension d, byte[] image) {
+	public String writeFromFs(Path p, ImageDimension d, byte[] image) {
 		if (Objects.isNull(p)) return null;
 		if (Objects.isNull(d)) return null;
 
@@ -28,7 +28,7 @@ public class IOCache extends IOAbstract {
 		return write(idLine, image);
 	}
 
-	public String writeFromDb(Long id, ImageFileDimension d, byte[] image) {
+	public String writeFromDb(Long id, ImageDimension d, byte[] image) {
 		if (Objects.isNull(id)) return null;
 		if (Objects.isNull(d)) return null;
 
@@ -36,7 +36,7 @@ public class IOCache extends IOAbstract {
 		return write(idLine, image);
 	}
 
-	private String genIdLine(Path p, ImageFileDimension d) {
+	private String genIdLine(Path p, ImageDimension d) {
 		final StringBuilder sb = new StringBuilder();
 		sb.append(p.toFile().getName())
 				.append("-")
@@ -50,7 +50,7 @@ public class IOCache extends IOAbstract {
 		return new String(sb);
 	}
 
-	private String getDbIdLine(long id, ImageFileDimension d) {
+	private String getDbIdLine(long id, ImageDimension d) {
 		final StringBuilder sb = new StringBuilder();
 		sb.append(id)
 				.append("-")

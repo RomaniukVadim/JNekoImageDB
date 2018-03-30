@@ -1,14 +1,17 @@
 package service.img_worker;
 
 import java.nio.file.Path;
-import java.util.List;
 
-import fao.ImageFileDimension;
-import javafx.scene.image.Image;
+import dao.ImageDimension;
+import service.img_worker.proto.Callback;
+import service.img_worker.results.DirectoryListResult;
+import service.img_worker.results.PreviewGenerationResult;
 
 public interface LocalImageService {
-	void loadPreviewFromFs(Path path,  ImageFileDimension imageFileDimension, LocalImageServiceCallback callback);
-	void loadPreviewFromStorage(Long id, ImageFileDimension imageFileDimension, LocalImageServiceCallback callback);
+	LocalImageServiceTask<PreviewGenerationResult> loadPreviewFromFs(Path path,  ImageDimension imageDimension, Callback<PreviewGenerationResult> callback);
+	LocalImageServiceTask<PreviewGenerationResult> loadPreviewFromStorage(Long id, ImageDimension imageDimension, Callback<PreviewGenerationResult> callback);
 
-	void getImageFilesList(Path directory, LocalImageServiceCallback callback);
+	void cancelTask(LocalImageServiceTask task);
+
+	void getImageFilesList(Path directory, Callback<DirectoryListResult> callback);
 }

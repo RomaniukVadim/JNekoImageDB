@@ -1,6 +1,15 @@
 package ui.dialog;
 
-import fao.ImageFile;
+import java.io.File;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
@@ -12,24 +21,13 @@ import javafx.stage.Stage;
 import jiconfont.icons.GoogleMaterialDesignIcons;
 import jiconfont.javafx.IconNode;
 import service.RootService;
-import service.fs.FilePusherActionListener;
-import service.fs.FilePusherTask;
+import service.img_worker.LocalImageService;
+import service.img_worker.LocalImageServiceImpl;
 import ui.imagelist.FileImageList;
 import ui.simplepanel.Panel;
 import ui.simplepanel.PanelButton;
 
-import java.io.File;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-public class ImportImagesDialog extends Stage implements FilePusherActionListener {
+public class ImportImagesDialog extends Stage {
     private final IconNode iconForRootNode = new IconNode(GoogleMaterialDesignIcons.FOLDER);
 
     private final class TreeCellFactory extends TreeCell<Path> {
@@ -88,6 +86,8 @@ public class ImportImagesDialog extends Stage implements FilePusherActionListene
         }
     }
 
+    private final LocalImageService localImageService;
+
     private final FileImageList baseImageList = new FileImageList();
     private final VBox treePane = new VBox();
     private final VBox rootPane = new VBox();
@@ -112,11 +112,12 @@ public class ImportImagesDialog extends Stage implements FilePusherActionListene
             }),
             Panel.getFixedSpacer(),
             new PanelButton("Import to DB", GoogleMaterialDesignIcons.IMPORT_EXPORT, e -> {
+                /*
                 final Set<ImageFile> selectedImageFiles = baseImageList.getSelectedImageFiles();
                 if (selectedImageFiles.isEmpty()) return;
                 selectedImageFiles.forEach(img -> {
                     RootService.getFileService().pushImageToStorage(new FilePusherTask(this, img.getImagePath()));
-                });
+                });*/
 
                 waitDialog.clearText();
                 waitDialog.startProgress();
@@ -137,6 +138,8 @@ public class ImportImagesDialog extends Stage implements FilePusherActionListene
 
     public ImportImagesDialog() {
         super();
+
+        localImageService = LocalImageServiceImpl.getInstance();
 
         iconForRootNode.getStyleClass().add("tree_dir_icon");
 
@@ -180,11 +183,10 @@ public class ImportImagesDialog extends Stage implements FilePusherActionListene
         tree.setOnMouseClicked(e -> {
             final TreeItem<Path> treeItem = tree.getSelectionModel().getSelectedItem();
             if (Objects.nonNull(treeItem) && Objects.nonNull(treeItem.getValue())) {
-                final CopyOnWriteArrayList<ImageFile> list = RootService.getFileService().readImagesFromDirectory(treeItem.getValue());
-                if (Objects.nonNull(list)) {
-                    //System.out.println("readImagesFromDirectory " + treeItem.getValue().toFile().getAbsolutePath());
-                    baseImageList.setImages(list);
-                }
+                localImageService.getImageFilesList(treeItem.getValue(), c -> {
+                    if (c.getFiles() != null)
+                        Platform.runLater(t -> baseImageList.setImages(c.getFiles()));
+                });
             }
         });
 
@@ -202,6 +204,7 @@ public class ImportImagesDialog extends Stage implements FilePusherActionListene
         }
     }
 
+    /*
     @Override
     public void onPush(Path p, int totalCount, int currentCount) {
         waitDialog.setCaption("Processing " + currentCount + "...");
@@ -221,5 +224,5 @@ public class ImportImagesDialog extends Stage implements FilePusherActionListene
     @Override
     public void onZeroQuene() {
         waitDialog.stopProgress();
-    }
+    }*/
 }

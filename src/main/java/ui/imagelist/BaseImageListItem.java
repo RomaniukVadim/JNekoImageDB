@@ -1,30 +1,29 @@
 package ui.imagelist;
 
-import fao.ImageFile;
-import javafx.geometry.VPos;
+import dao.ImagePreviewMetadata;
+import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.text.TextAlignment;
 import jiconfont.icons.GoogleMaterialDesignIcons;
 import jiconfont.javafx.IconFontFX;
-import utils.messages.MessageQueue;
-import utils.messages.Msg;
-import utils.workers.async_img_resizer.ImageResizeService;
-import utils.workers.async_img_resizer.ImageResizeTask;
-import utils.workers.async_img_resizer.ImageResizeTaskCallback;
+import service.img_worker.LocalImageService;
+import service.img_worker.LocalImageServiceImpl;
+import service.img_worker.LocalImageServiceTask;
+import service.img_worker.proto.Callback;
+import service.img_worker.results.PreviewGenerationResult;
 
-import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class BaseImageListItem extends Canvas implements ImageResizeTaskCallback {
-    public final UUID THIS_UUID = UUID.randomUUID();
+public class BaseImageListItem extends Canvas {
+    //public final UUID THIS_UUID = UUID.randomUUID();
 
-    private static final Image badImage = new Image("/dummy/badimage.png");
+    //private static final Image badImage = new Image("/dummy/badimage.png");
     private static final Color notSelectedColor = Color.color(0.8,0.8,0.8);
     private static final Color selectedColor = Color.color(0.3,0.8,0.3);
     private static final Color grayColor = Color.color(0.3,0.3,0.3);
@@ -32,28 +31,32 @@ public class BaseImageListItem extends Canvas implements ImageResizeTaskCallback
             BaseImageListItem.class.getResource("/style/fonts/QUILLC.TTF").toExternalForm(),56);
     private static final Image selectedIcon = IconFontFX.buildImage(GoogleMaterialDesignIcons.DONE, 64, selectedColor, selectedColor);
 
-    private int localIndex;
-    private int globalIndex;
     private Image image;
-    private boolean selected = false;
+    private ImagePreviewMetadata imageMeta;
+    private final LocalImageService localImageService;
+    private LocalImageServiceTask<PreviewGenerationResult> currentTask;
 
-    private final BaseImageListItemSelectionListener listener;
-    private ImageFile imageFile = null;
+    private final Callback<PreviewGenerationResult> callback = r -> {
+        final Image img = r.getImage();
+        if (img != null) {
+            image = img;
+            Platform.runLater(this::drawImage);
+        }
+    };
 
-    public BaseImageListItem(BaseImageListItemSelectionListener listItemSelectionListener) {
-        listener = listItemSelectionListener;
+    public BaseImageListItem(EventHandler<? super MouseEvent> value) {
+        localImageService = LocalImageServiceImpl.getInstance();
+        getImageMeta().setSelected(false);
         setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.PRIMARY) {
-                setSelected(!isSelected());
-                listener.onSelect(imageFile, getLocalIndex(), isSelected());
+                getImageMeta().setSelected(!getImageMeta().isSelected());
                 drawImage();
-            } else if (e.getButton() == MouseButton.SECONDARY) {
-                listener.OnRightClick(imageFile, localIndex);
             }
+            value.handle(e);
         });
     }
 
-    public void drawImage() {
+    private void drawImage() {
         if (Objects.isNull(image)) {
             setNullImage();
             return;
@@ -62,90 +65,45 @@ public class BaseImageListItem extends Canvas implements ImageResizeTaskCallback
         final GraphicsContext context = getGraphicsContext2D();
         context.clearRect(0, 0, getWidth(), getHeight());
         context.drawImage(image, 0, 0);
-        context.setLineWidth(isSelected() ? 9.0 : 1.5);
-        context.setStroke(isSelected() ? selectedColor : notSelectedColor);
+        context.setLineWidth(getImageMeta().isSelected() ? 9.0 : 1.5);
+        context.setStroke(getImageMeta().isSelected() ? selectedColor : notSelectedColor);
         context.strokeRect(0, 0, getWidth(), getHeight());
-        if (isSelected()) context.drawImage(selectedIcon, getWidth() - 74, 10);
-    }
-
-    public void drawPageIndicator(int i) {
-        final GraphicsContext context = getGraphicsContext2D();
-        context.clearRect(0, 0, getWidth(), getHeight());
-        context.setStroke(grayColor);
-        context.setFont(font);
-        context.setTextAlign(TextAlignment.CENTER);
-        context.setTextBaseline(VPos.CENTER);
-        context.strokeText("" + i, getWidth()/2,getHeight()/2);
+        if (getImageMeta().isSelected()) context.drawImage(selectedIcon, getWidth() - 74, 10);
     }
 
     public void setNullImage() {
+        image = null;
         final GraphicsContext context = getGraphicsContext2D();
         context.clearRect(0, 0, getWidth(), getHeight());
     }
 
-    @Override
-    public void onImageResized(Image img, int globalIndex) {
-        if (this.globalIndex != globalIndex) return;
+    public void createImage(ImagePreviewMetadata meta) {
+        imageMeta = meta;
 
-        image = img;
-        drawImage();
+        if (currentTask != null) {
+            localImageService.cancelTask(currentTask);
+            currentTask = null;
+        }
+
+        if (meta == null) {
+            setNullImage();
+            return;
+        }
+
+        if (meta.getDimension() == null) {
+
+        }
+
+        if ((meta.getDbId() != null) && (meta.getPath() == null) && (meta.getDimension() != null)) {
+            currentTask = localImageService.loadPreviewFromStorage(meta.getDbId(), meta.getDimension(), callback);
+        } else if ((meta.getDbId() == null) && (meta.getPath() != null) && (meta.getDimension() != null)) {
+            currentTask = localImageService.loadPreviewFromFs(meta.getPath(), meta.getDimension(), callback);
+        } else {
+            setNullImage();
+        }
     }
 
-    @Override
-    public void onError(Path p, int globalIndex) {
-        if (this.globalIndex != globalIndex) return;
-
-        final GraphicsContext context = getGraphicsContext2D();
-        double x = (getWidth() - badImage.getWidth()) / 2;
-        double y = (getHeight() - badImage.getHeight()) / 2;
-        context.clearRect(0, 0, getWidth(), getHeight());
-        context.drawImage(badImage, (x <= 0) ? 0 : x, (y <= 0) ? 0 : y);
-    }
-
-    public int getLocalIndex() {
-        return localIndex;
-    }
-
-    public void setLocalIndex(int localIndex) {
-        this.localIndex = localIndex;
-    }
-
-    public void notifyResized(List<ImageFile> imageFiles) {
-        if (Objects.isNull(imageFiles)) return;
-        if ((getWidth() < 16) || (getHeight() < 16)) return;
-        if ((localIndex >= imageFiles.size()) || (localIndex < 0)) return;
-
-        imageFiles.get(localIndex).setLocalIndex(globalIndex);
-        imageFiles.get(localIndex).setPreviewSize(getWidth(), getHeight());
-        final ImageResizeTask imageResizeTask = new ImageResizeTask(imageFiles.get(localIndex), this);
-
-        final Msg<ImageResizeTask> msg = new Msg<>(imageResizeTask, 0, THIS_UUID, ImageResizeService.SERVICE_UUID, null);
-        MessageQueue.send(msg);
-    }
-
-    public boolean isSelected() {
-        return selected;
-    }
-
-    public void setSelected(boolean selected) {
-        if (Objects.isNull(image)) return;
-        this.selected = selected;
-        drawImage();
-    }
-
-    public ImageFile getImageFile() {
-        return imageFile;
-    }
-
-    public void setImageFile(ImageFile imageFile) {
-        this.imageFile = imageFile;
-    }
-
-    public int getGlobalIndex() {
-        return globalIndex;
-    }
-
-    public void setGlobalIndex(int globalIndex) {
-        this.globalIndex = globalIndex;
+    public ImagePreviewMetadata getImageMeta() {
+        return imageMeta;
     }
 }

@@ -54,6 +54,10 @@ public abstract class MultithreadedSingletone<T> {
 		queue.add(t);
 	}
 
+	public void cancelTask(T t) {
+		queue.remove(t);
+	}
+
 	public void disposeInstance() {
 		executor.shutdownNow();
 	}

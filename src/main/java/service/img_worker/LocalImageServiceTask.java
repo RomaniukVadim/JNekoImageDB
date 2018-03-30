@@ -2,17 +2,18 @@ package service.img_worker;
 
 import java.nio.file.Path;
 
-import fao.ImageFileDimension;
+import dao.ImageDimension;
+import service.img_worker.proto.Callback;
 
-public class LocalImageServiceTask {
-	public static enum Type {
-		CREATE_PREVIEW, UPLOAD_TO_DATABASE, DOWNLOAD_FROM_DATABASE
+public class LocalImageServiceTask<T> {
+	public enum Type {
+		CREATE_PREVIEW, UPLOAD_TO_DATABASE, DOWNLOAD_FROM_DATABASE, DIRECTORY_LIST
 	}
 
 	private Path path;
 	private Long databaseId;
-	private ImageFileDimension imageFileDimension;
-	private LocalImageServiceCallback callback;
+	private ImageDimension imageDimension;
+	private Callback<T> callback;
 	private Type taskType;
 
 	public Path getPath() {
@@ -31,20 +32,20 @@ public class LocalImageServiceTask {
 		this.databaseId = databaseId;
 	}
 
-	public LocalImageServiceCallback getCallback() {
+	public Callback<T> getCallback() {
 		return callback;
 	}
 
-	public void setCallback(LocalImageServiceCallback callback) {
+	public void setCallback(Callback<T> callback) {
 		this.callback = callback;
 	}
 
-	public ImageFileDimension getImageFileDimension() {
-		return imageFileDimension;
+	public ImageDimension getImageDimension() {
+		return imageDimension;
 	}
 
-	public void setImageFileDimension(ImageFileDimension imageFileDimension) {
-		this.imageFileDimension = imageFileDimension;
+	public void setImageDimension(ImageDimension imageDimension) {
+		this.imageDimension = imageDimension;
 	}
 
 	public Type getTaskType() {

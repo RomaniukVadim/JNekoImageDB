@@ -1,10 +1,10 @@
-package fao;
+package dao;
 
-public class ImageFileDimension {
+public class ImageDimension {
     private double previewWidth;
     private double previewHeight;
     private double realWidth;
-    private double realHeaight;
+    private double realHeight;
 
     public double getPreviewWidth() {
         return previewWidth;
@@ -30,11 +30,11 @@ public class ImageFileDimension {
         this.realWidth = realWidth;
     }
 
-    public double getRealHeaight() {
-        return realHeaight;
+    public double getRealHeight() {
+        return realHeight;
     }
 
-    public void setRealHeaight(double realHeaight) {
-        this.realHeaight = realHeaight;
+    public void setRealHeight(double realHeight) {
+        this.realHeight = realHeight;
     }
 }

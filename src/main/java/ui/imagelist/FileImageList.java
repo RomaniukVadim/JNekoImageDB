@@ -9,6 +9,7 @@ import utils.Utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,8 +20,8 @@ import java.util.Objects;
 import java.util.Set;
 
 public class FileImageList extends AbstractImageList {
-    private final ArrayList<ImageFile> imageFiles = new ArrayList<>();
-    private final Set<ImageFile> selectedImageFiles = new HashSet<>();
+    private final ArrayList<Path> imageFiles = new ArrayList<>();
+    private final Set<Path> selectedImageFiles = new HashSet<>();
 
     private final StackPane viewPane = new StackPane();
     private final ImageView imageView = new ImageView();
@@ -47,11 +48,11 @@ public class FileImageList extends AbstractImageList {
         Utils.removeBlur(getRootVBox());
     }
 
-    public void setImages(Collection<ImageFile> images) {
+    public void setImages(Collection<Path> images) {
         imageFiles.clear();
         imageFiles.addAll(images);
 
-        Collections.sort(imageFiles, Comparator.comparing(a -> a.getImagePath().toFile().getName()));
+        Collections.sort(imageFiles, Comparator.comparing(a -> a.toFile().getName()));
 
         final int lastPageCount = imageFiles.size() % getElementsPerPage();
         final int inFullPageCount = imageFiles.size() - lastPageCount;
@@ -63,7 +64,7 @@ public class FileImageList extends AbstractImageList {
     }
 
     @Override
-    public List<ImageFile> imageRequest(int page, int pages) {
+    public List<Path> imageRequest(int page, int pages) {
         final int imagesPerPage = getElementsPerPage();
         final int from = (imagesPerPage * page);
         if (from >= imageFiles.size()) return null;
@@ -73,12 +74,12 @@ public class FileImageList extends AbstractImageList {
     }
 
     @Override
-    public Set<ImageFile> selectedRequest() {
+    public Set<Path> selectedRequest() {
         return selectedImageFiles;
     }
 
     @Override
-    public void onSelect(ImageFile imageFile, int index, boolean selected) {
+    public void onSelect(Path imageFile, int index, boolean selected) {
         if (Objects.isNull(imageFile)) return;
         if (selected) {
             getSelectedImageFiles().add(imageFile);
@@ -101,7 +102,7 @@ public class FileImageList extends AbstractImageList {
         }
     }
 
-    public Set<ImageFile> getSelectedImageFiles() {
+    public Set<Path> getSelectedImageFiles() {
         return selectedImageFiles;
     }
 

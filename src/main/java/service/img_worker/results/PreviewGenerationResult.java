@@ -1,4 +1,4 @@
-package service.img_worker;
+package service.img_worker.results;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -7,16 +7,15 @@ import java.util.Map;
 import javafx.scene.image.Image;
 import utils.Loggable;
 
-public class LocalImageServiceResult implements Loggable {
+public class PreviewGenerationResult implements Loggable {
 	private Path path;
 	private Image image;
 	private Exception exception;
 	private String errorText;
-	private List<Path> files;
 	private Map<String, Object> meta;
 	private Long id;
 
-	public LocalImageServiceResult(Path path, Long id, String errorText, Exception e) {
+	public PreviewGenerationResult(Path path, Long id, String errorText, Exception e) {
 		this.path = path;
 		this.errorText = errorText;
 		this.exception = e;
@@ -24,19 +23,19 @@ public class LocalImageServiceResult implements Loggable {
 		W(errorText + "; error: " + e.getMessage());
 	}
 
-	public LocalImageServiceResult(Path path, Long id, String errorText) {
+	public PreviewGenerationResult(Path path, Long id, String errorText) {
 		this.path = path;
 		this.errorText = errorText;
 		this.id = id;
 		W(errorText);
 	}
 
-	public LocalImageServiceResult(Path path, Image image) {
+	public PreviewGenerationResult(Path path, Image image) {
 		this.path = path;
 		this.image = image;
 	}
 
-	public LocalImageServiceResult(Long id, Image image) {
+	public PreviewGenerationResult(Long id, Image image) {
 		this.id = id;
 		this.image = image;
 	}
@@ -63,14 +62,6 @@ public class LocalImageServiceResult implements Loggable {
 
 	public void setException(Exception exception) {
 		this.exception = exception;
-	}
-
-	public List<Path> getFiles() {
-		return files;
-	}
-
-	public void setFiles(List<Path> files) {
-		this.files = files;
 	}
 
 	public Map<String, Object> getMeta() {

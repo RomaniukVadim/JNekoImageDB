@@ -1,8 +1,8 @@
 package ui.imagelist;
 
-import fao.ImageFile;
+import java.nio.file.Path;
 
 public interface BaseImageListItemSelectionListener {
-    void onSelect(ImageFile imageFile, int index, boolean selected);
-    void OnRightClick(ImageFile imageFile, int index);
+    void onSelect(Path imageFile, int index, boolean selected);
+    void OnRightClick(Path imageFile, int index);
 }

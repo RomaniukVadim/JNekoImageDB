@@ -1,15 +1,7 @@
 package service;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import dao.AppSettings;
-import service.fs.EncryptedCacheAccessService;
-import service.fs.EncryptedFileAccessService;
-import ui.dialog.ImportImagesDialog;
-import utils.messages.MessageQueue;
-import utils.workers.async_dao.AsyncDaoService;
-import utils.workers.async_fs.AsyncFsService;
-import utils.workers.async_img_resizer.ImageResizeService;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +10,13 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+
+import dao.AppSettings;
+import service.img_worker.LocalImageServiceImpl;
+import ui.dialog.ImportImagesDialog;
+import utils.messages.MessageQueue;
 
 public class RootService {
     public static final String DATASTORAGE_ROOT = "storage" + File.separator;
@@ -27,37 +24,14 @@ public class RootService {
     private static final Gson gson = new Gson();
     private static final Path appConfigPath = new File(DATASTORAGE_ROOT + "config.json").toPath();
 
-    //private static final SecurityService authService = new SecurityService();
-
-    private static EncryptedCacheAccessService encryptedCacheAccessService;
-    private static EncryptedFileAccessService encryptedFileAccessService;
     private static ImportImagesDialog importImagesDialog;
-
     private static AppSettings appSettings;
 
     public static void dispose() {
         if (Objects.nonNull(importImagesDialog)) importImagesDialog.dispose();
 
-        AsyncFsService.dispose();
-        AsyncDaoService.dispose();
-        ImageResizeService.dispose();
+        LocalImageServiceImpl.dispose();
         MessageQueue.dispose();
-    }
-
-    public static void initAllEncryptedStorages(byte[] authData) {
-        if (Objects.isNull(encryptedFileAccessService)) encryptedFileAccessService = new EncryptedFileAccessService(authData);
-        if (Objects.isNull(encryptedCacheAccessService)) encryptedCacheAccessService = new EncryptedCacheAccessService(authData);
-        if (Objects.isNull(importImagesDialog)) importImagesDialog = new ImportImagesDialog();
-    }
-
-    public static EncryptedFileAccessService getFileService() {
-        if (Objects.isNull(encryptedFileAccessService)) throw new IllegalStateException("EncryptedFileAccessService need init before use");
-        return encryptedFileAccessService;
-    }
-
-    public static EncryptedCacheAccessService getCacheService() {
-        if (Objects.isNull(encryptedCacheAccessService)) throw new IllegalStateException("EncryptedCacheAccessService need init before use");
-        return encryptedCacheAccessService;
     }
 
     public static AppSettings getAppSettings() {

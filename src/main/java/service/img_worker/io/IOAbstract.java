@@ -3,7 +3,6 @@ package service.img_worker.io;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static service.RootService.DATASTORAGE_ROOT;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,15 +10,15 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import org.bouncycastle.util.encoders.Hex;
 
-import fao.ImageFile;
-import service.img_worker.ImageResizeUtils;
 import service.img_worker.SecurityCryptUtils;
 import service.img_worker.SecurityService;
 import utils.Loggable;
@@ -112,6 +111,10 @@ public abstract class IOAbstract implements Loggable {
 
 		final byte[] encrypted = crypt(image);
 		final String storagePath = getStoragePath(this.storageDir, hashString);
+		if (storagePath == null) {
+			W("Cannot generate path for hash " + hashString);
+			return null;
+		}
 		final Path fileForSave = new File(storagePath).getAbsoluteFile().toPath();
 		try {
 			Files.write(fileForSave, encrypted, CREATE);
@@ -123,27 +126,21 @@ public abstract class IOAbstract implements Loggable {
 		return hashString;
 	}
 
-	public static CopyOnWriteArrayList<ImageFile> list(Path dir) {
-		final Set<Path> imagesList = Arrays.asList(dir.toAbsolutePath().toFile().listFiles()).parallelStream()
-				.filter(file -> file.isFile())
+	public static CopyOnWriteArrayList<Path> list(Path dir) {
+		final List<File> files = Optional.ofNullable(dir)
+				.map(Path::toAbsolutePath)
+				.map(Path::toFile)
+				.map(File::listFiles)
+				.map(Arrays::asList)
+				.orElse(Collections.EMPTY_LIST);
+		final List<Path> imagesList = files.parallelStream()
+				.filter(File::isFile)
 				.filter(file -> allowedExtentions.stream().filter(name -> file.getName().toLowerCase().endsWith(name)).count() > 0)
-				.map(file -> file.toPath())
-				.collect(Collectors.toSet());
-		final CopyOnWriteArrayList<ImageFile> retval = new CopyOnWriteArrayList<>();
-		if (Objects.nonNull(imagesList)) {
-			imagesList.forEach(file -> {
-				try {
-					final Dimension dimension = ImageResizeUtils.getImageDimension(file.toFile().getAbsoluteFile());
-					final ImageFile imageFile = new ImageFile(file);
-					imageFile.setRealSize(dimension.getWidth(), dimension.getHeight());
-					retval.add(imageFile);
-				} catch (IOException e) {
-					System.err.println("File \"" + file.toFile().getName() + "\" not an image.");
-				}
-			});
+				.map(File::toPath)
+				.collect(Collectors.toList());
 
-			Collections.sort(retval, Comparator.comparing(a -> a.getImagePath().toFile().getName()));
-		}
+		final CopyOnWriteArrayList<Path> retval = new CopyOnWriteArrayList<>(imagesList);
+		retval.sort(Comparator.comparing(a -> a.toFile().getName()));
 		return retval;
 	}
 }
